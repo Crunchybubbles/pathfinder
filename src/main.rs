@@ -270,202 +270,8 @@ impl PartialEq for Pool {
     }
    
 }
-// struct Graph<T, G> {
-//     nodes: Vec<Box<T>>,
-//     edges: HashMap<G, Vec<Box<T>>>,
-// }
 
-// impl Graph<Pool, Address> {
-//     fn new(pools: Vec<Pool>) -> Self {
-// 	let mut nodes: Vec<Box<Pool>> = Vec::new();
-// 	let mut edges: HashMap<Address, Vec<Box<Pool>>> = HashMap::new();
-// 	for pool in pools {
-// 	    let token0 = *pool.token0();
-// 	    let token1 = *pool.token1();
-// 	    let b = Box::new(pool);
-// 	    if let Some(stuff) = edges.get_mut(&token0) {
-// 		stuff.push(b.clone());
-// 	    } else {
-// 		edges.insert(token0, vec![b.clone()]);
-// 	    }
-
-// 	    if let Some(stuff) = edges.get_mut(&token1) {
-// 		stuff.push(b.clone());
-// 	    } else {
-// 		edges.insert(token1, vec![b.clone()]);
-// 	    }
-// 	    nodes.push(b);
-    
-// 	}
-
-// 	return Graph{nodes, edges};
-//     }
-    
-// }
-#[derive(Debug, Copy, Clone)]
-struct Step<'a> {
-    pool: &'a Box<Pool>,
-    token_in: &'a Address,
-    token_out: &'a Address,
-    amount_in: U256,
-    amount_out: U256,
-}
-
-#[derive(Debug, Clone)]
-struct SwapPath<'a>{
-    steps: Vec<Step<'a>>,
-    addrs: Vec<Address>,
-}
-
-
-impl <'a> SwapPath<'a> {
-    fn contains_token(&self, target: &Address) -> bool {
-	let mut r: bool = false;
-	for step in self.steps.iter() {
-	    if step.token_out == target {
-		r = true;
-		break;
-	    }
-	}
-	return r;
-    }
-
-    fn show(&self) {
-	for step in self.steps.iter() {
-	    println!("address {}", step.pool.addr());
-	    println!("tokenIn {}", step.token_in);
-	    println!("tokenOu {}", step.token_out);
-	    
-	}
-	println!("");
-    }
-    
-
-}
-
-impl<'a> PartialEq for SwapPath<'a> {
-    fn eq(&self, other: &Self) -> bool {
-	let mut v: bool = false;
-	if self.steps.len() != other.steps.len() {
-	    return v;
-	} else {
-	    for i in 0..self.steps.len() {
-		if self.steps[i].pool != other.steps[i].pool {
-		    return v;
-		}
-	    }
-	    v = true;
-	    return v;
-	}
-    }
-}
-
-struct Graph<T, G> {
-    edges: HashMap<G, Vec<Box<T>>>,
-}
-
-impl Graph<Pool, Address> {
-    fn new(pools: Vec<Pool>) -> Self {
-	let mut edges: HashMap<Address, Vec<Box<Pool>>> = HashMap::with_capacity(pools.len());
-	for pool in pools {
-	    let token0 = *pool.token0();
-	    let token1 = *pool.token1();
-	    let b = Box::new(pool);
-	    if let Some(stuff) = edges.get_mut(&token0) {
-		stuff.push(b.clone());
-	    } else {
-		edges.insert(token0, vec![b.clone()]);
-	    }
-
-	    if let Some(stuff) = edges.get_mut(&token1) {
-		stuff.push(b);
-	    } else {
-		edges.insert(token1, vec![b]);
-	    }
-    
-	}
-
-	return Graph{edges};
-    }
-    
-    async fn dfs_each_token_once(&self, start: &Address, end: &Address) -> Vec<SwapPath> {
-	let mut stack: Vec<SwapPath> = Vec::with_capacity(90000);
-	let mut paths: Vec<SwapPath> = Vec::with_capacity(500);
-//	const MAXLEN_MIN_ONE: usize = MAXLEN - 1;
-//	const MAXCAP: usize = MAXLEN + 1;
-
-
-	let pools = self.edges.get(start).unwrap();
-	for pool in pools {
-	    let token_out = pool.token_out(start);
-	    let token_in = pool.token_out(token_out);
-	    let mut steps: Vec<Step> = Vec::with_capacity(MAXLEN);
-	    steps.push(Step{pool, token_in, token_out, amount_in: ZERO, amount_out: ZERO});
-	    let mut addrs: Vec<Address> = Vec::with_capacity(MAXLEN);
-	    addrs.push(*pool.addr());
-	    let sp = SwapPath{steps, addrs};
-	    if token_out == end {
-		paths.push(sp);
-	    } else {
-		stack.push(sp);
-	    }	 
-	}
-	loop {
-	    // println!("stacke len {}", stack.len());
-	    // if let Some(last) = paths.last() {
-	    // 	println!("path len {:#?}", last.steps);
-	    // }
-
-	    // if let Some(last) = paths.last() {
-	    // 	println!("path len {}", last.steps.len());
-	    // 	println!("paths found {}",paths.len()); 
-	    // }
-	    
-	    if let Some(path) = stack.pop() {
-		let last = path.steps.len() - 1;
-		let last_step = path.steps[last];
-		if let Some(pools) = self.edges.get(&last_step.token_out) {
-		    for pool in pools {
-			let mut p = path.clone();
-			if !p.addrs.contains(&pool.addr()) {
-			    let token_in = last_step.token_out;
-			    let token_out =  pool.token_out(token_in);
-			    if !p.contains_token(&token_out) {
-				let step = Step{pool, token_in, token_out, amount_in: ZERO, amount_out: ZERO};
-				p.steps.push(step);
-				if step.token_out == end {
-				    paths.push(p);
-				} else {
-				    if p.steps.len() < MAXLEN {
-					stack.push(p);
-				    }
-				}
-			
-			    }
-			}
-		    }
-		    
-		}
-	    } else {
-		break;
-	    }
-	}
-	//println!("{}", paths.len());
-	return paths;
-    }
-
-    fn markets_of_token(&self, token: &Address) -> Option<Vec<Box<Pool>>> {
-	if let Some(pools) = self.edges.get(token) {
-	    Some(pools.clone())
-	} else {
-	    None
-	}
-
-    }
-
-}
-
-struct Raph<P, A, I> {
+struct Graph<P, A, I> {
     pools: Vec<P>,
     tokens: AHashMap<A, I>,
     ttp: AHashMap<I, Vec<I>>,
@@ -474,7 +280,7 @@ struct Raph<P, A, I> {
     
 }
 
-impl Raph<Pool, Address, usize> {
+impl Graph<Pool, Address, usize> {
     fn new(pools: Vec<Pool>) -> Self {
 	let mut tokens: AHashMap<Address, usize> = AHashMap::with_capacity(pools.len());
 	let mut ttp: AHashMap<usize, Vec<usize>> = AHashMap::with_capacity(pools.len());
@@ -518,7 +324,7 @@ impl Raph<Pool, Address, usize> {
 	    
 	}
 	    
-	Raph{pools, tokens, ttp, itt, ptt}
+	Graph{pools, tokens, ttp, itt, ptt}
     }
 
     fn markets_of_token(&self, token: &Address) -> Option<Vec<Pool>> {
@@ -708,7 +514,7 @@ const MIN_SQRT_PRICE: U256 = U256{0:[
 
 const ZERO: U256 = U256{0:[0,0,0,0]};
 
-const MAXLEN: usize = 2;
+const MAXLEN: usize = 4;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
@@ -737,30 +543,18 @@ async fn main() -> eyre::Result<()> {
     let t = Instant::now();
     let graph = Graph::new(pools.clone());
     let took = t.elapsed();
-    println!("{}", took.as_millis());
+    println!("took {}ms to build graph", took.as_millis());
 
-    let t = Instant::now();
-    let raph = Raph::new(pools.clone());
-    let took = t.elapsed();
-    println!("{}", took.as_millis());
 
     //let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
     let yfi = "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e".parse::<Address>().unwrap();
 
     let t = Instant::now();
-    let g = graph.dfs_each_token_once(&yfi, &yfi).await;
+    let g = graph.find_path(&yfi, &yfi).await.unwrap();
     let gt = t.elapsed();
-    
-    let t = Instant::now();
-    let r = raph.find_path(&yfi, &yfi).await.unwrap();
-    let rt = t.elapsed();
 
 
-    println!("{}", gt.as_millis());
-    println!("{}", rt.as_millis());
-
-    println!("{}", g.len());
-    println!("{}", r.len());
+    println!("took {}ms to search finding {} paths with a maxlength of {}", gt.as_millis(), g.len(), MAXLEN);
     
 
 //     let now = Instant::now();
