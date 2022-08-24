@@ -271,6 +271,7 @@ impl PartialEq for Pool {
    
 }
 
+#[derive(Clone)]
 struct Graph<P, A, I> {
     pools: Vec<P>,
     tokens: AHashMap<A, I>,
@@ -413,7 +414,35 @@ impl Graph<Pool, Address, usize> {
 	    return &self.ptt[pool][0];
 	}
     }
+
+    fn path_from_indices(&self, paths: Vec<Path>) -> Vec<SwapPath> {
+	let mut swap_paths: Vec<SwapPath> = Vec::with_capacity(paths.capacity());
+	for path in paths {
+	    let mut swap_path = SwapPath{steps: Vec::with_capacity(path.steps.capacity())};
+	    
+	    for step in path.steps {
+		let pool = self.pools.get(*step.pool).unwrap().addr();
+		let token_in = self.itt.get(step.token_in).unwrap();
+		let token_out = self.itt.get(step.token_out).unwrap();
+		swap_path.steps.push(SwapStep{pool, token_in, token_out});
+	    }
+	    swap_paths.push(swap_path);
+	}
+	return swap_paths;
+
+    }
 }
+#[derive(Debug)]
+struct SwapStep<'a> {
+    pool: &'a Address,
+    token_in: &'a Address,
+    token_out: &'a Address,
+}
+#[derive(Debug)]
+struct SwapPath <'a> {
+    steps: Vec<SwapStep<'a>>
+}
+
 #[derive(Clone)]
 struct Path <'a> {
     steps: Vec<PathStep<'a>>
@@ -441,6 +470,7 @@ impl <'a> Path <'a> {
 	}
 	return r;
     }
+
 }
 
 #[derive(Clone)]
@@ -514,7 +544,7 @@ const MIN_SQRT_PRICE: U256 = U256{0:[
 
 const ZERO: U256 = U256{0:[0,0,0,0]};
 
-const MAXLEN: usize = 4;
+const MAXLEN: usize = 3;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
@@ -546,15 +576,39 @@ async fn main() -> eyre::Result<()> {
     println!("took {}ms to build graph", took.as_millis());
 
 
-    //let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
+    let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
     let yfi = "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e".parse::<Address>().unwrap();
-
+    let dai = "0x6B175474E89094C44Da98b954EedeAC495271d0F".parse::<Address>().unwrap();
+    // for i in graph.clone().tokens.keys() {
+    // 	for j in graph.clone().tokens.keys() {
+    // 	    let t = Instant::now();
+    // 	    let paths = graph.find_path(i, j).await.unwrap();
+    // 	    let gt = t.elapsed();
+    // 	    println!("{} ---> {}", i, j);
+    // 	    println!("took {}ms to search finding {} paths", gt.as_millis(), paths.len());
+    // 	}
+    // }
     let t = Instant::now();
-    let g = graph.find_path(&yfi, &yfi).await.unwrap();
+    let g = graph.find_path(&weth, &yfi).await.unwrap();
     let gt = t.elapsed();
 
+    let t = Instant::now();
+    let p = graph.path_from_indices(g);
+    let pt = t.elapsed();
 
-    println!("took {}ms to search finding {} paths with a maxlength of {}", gt.as_millis(), g.len(), MAXLEN);
+    // for a in p {
+    // 	for step in a.steps {
+    // 	    println!("{:#?}", step);
+    // 	}
+    // 	println!("");
+    // }
+
+    println!("{} {}", gt.as_micros(), pt.as_micros());
+
+
+    //println!("took {}ms to search finding {} paths", gt.as_millis(), g.len());
+
+    
     
 
 //     let now = Instant::now();
