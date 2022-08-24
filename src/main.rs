@@ -4,13 +4,14 @@ use std::{
     fs,
     io,
     collections::{HashMap, VecDeque},
-    sync::Arc,
+    sync::{Arc, Mutex},
     time::Instant,
 };
 use ethers::types::{Address, U256};
 use serde::{Serialize, Deserialize};
 use ethers::{prelude::*, utils::parse_ether};
 use ahash::AHashMap;
+use tokio::task::JoinHandle;
 
 #[derive(Debug, Deserialize)]
 struct _Token {
@@ -345,16 +346,16 @@ impl Graph<Pool, Address, usize> {
 
     }
 
-    async fn find_path(&self, start: &Address, finish: &Address) -> Option<Vec<Path>> {
+    async fn find_path (&self, start: &Address, finish: &Address) -> Option<Vec<Path>> {
 	let mut stack: Vec<Path> = Vec::with_capacity(100000);
-	let mut found_paths: Vec<Path> = Vec::with_capacity(100000);
+	let mut foundpaths: Vec<Path> = Vec::with_capacity(100000);
 	if let Some(target_index) = self.tokens.get(finish) {
 	    if let Some(token_index) = self.tokens.get(start) {
 		if let Some(pool_indices) = self.ttp.get(token_index) {
 		    for pool_index in pool_indices.iter() {
 			let step = PathStep{pool: pool_index, token_in: token_index, token_out: self.token_out(*pool_index, *token_index)};
 			if step.token_out == target_index {
-			    found_paths.push(Path{steps: vec![step]});
+			    foundpaths.push(Path{steps: vec![step]});
 			} else {
 			    let mut steps: Vec<PathStep> = Vec::with_capacity(MAXLEN);
 			    steps.push(step);
@@ -368,42 +369,25 @@ impl Graph<Pool, Address, usize> {
 	    } else {
 		return None;
 	    }
-	
-
-	    loop {
-		if let Some(path) = stack.pop() {
-		    let last = path.steps.last().unwrap();
-		    if let Some(pools) = self.ttp.get(last.token_out) {
-			for pool in pools.iter() {
-			    if !path.contains(pool) {
-				let token_out = self.token_out(*pool, *last.token_out);
-				if !path.used_token(token_out) {
-				    let mut p = path.clone();
-				    let step = PathStep{pool, token_in: last.token_out, token_out};
-				    p.steps.push(step);
-				    if p.steps.last().unwrap().token_out == target_index {
-					found_paths.push(p);
-				    } else {
-					if p.steps.len() < MAXLEN {
-					    stack.push(p);
-					}
-				    }
-				}
-				
-			    }
-			}
-		    }
-		    
-		} else {
-		    break;
-		}
+	    let stack = Arc::new(Mutex::new(stack));
+	    let found_paths = Arc::new(Mutex::new(foundpaths));
+	    let mut handles = Vec::with_capacity(3);
+	    for _ in 0..2 {
+		let stack = Arc::clone(&stack);
+		let found_paths = Arc::clone(&found_paths);
+		
+		handles.push(std::thread::spawn(move || {pathing(stack, found_paths, self, target_index)}))
 	    }
+	    for h in handles {
+		let _ = h.join();
+	    }
+	    let f: Vec<Path> = (*found_paths.lock().unwrap()).to_vec();
+	    return Some(f);
+	
 	} else {
 	    return None;
 	}
-
-    
-	return Some(found_paths);
+	
     }
 
     fn token_out(&self, pool: usize, token_in: usize) -> &usize {
@@ -412,6 +396,35 @@ impl Graph<Pool, Address, usize> {
 	} else {
 	    return &self.ptt[pool][0];
 	}
+    }
+}
+
+fn pathing<'a> (stack: Arc<Mutex<Vec<Path<'a>>>>, found_paths: Arc<Mutex<Vec<Path<'a>>>>, graph: &'a Graph<Pool, Address, usize>, target_index: &usize) {
+    loop {
+	if let Some(path) = stack.lock().unwrap().pop() {
+	    let last = path.steps.last().unwrap();
+	    if let Some(pools) = graph.ttp.get(last.token_out) {
+		for pool in pools.iter() {
+		    if !path.contains(pool) {
+			let token_out = graph.token_out(*pool, *last.token_out);
+			if !path.used_token(token_out) {
+			    let mut p = path.clone();
+			    let step = PathStep{pool, token_in: last.token_out, token_out};
+			    p.steps.push(step);
+			    if p.steps.last().unwrap().token_out == target_index {
+				found_paths.lock().unwrap().push(p);
+			    } else {
+				if p.steps.len() < MAXLEN {
+				    stack.lock().unwrap().push(p);
+				}
+			    }
+			}
+		    }
+		}	
+	    }
+	}  else {
+	    break;
+	}	
     }
 }
 #[derive(Clone)]
@@ -514,7 +527,7 @@ const MIN_SQRT_PRICE: U256 = U256{0:[
 
 const ZERO: U256 = U256{0:[0,0,0,0]};
 
-const MAXLEN: usize = 4;
+const MAXLEN: usize = 2;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
@@ -540,21 +553,21 @@ async fn main() -> eyre::Result<()> {
     // let uni_calc = Arc::new(SwapCalc::new(addr, client));
 
     // let amount = U256::from_dec_str("100000").unwrap();
-    let t = Instant::now();
+    //let t = Instant::now();
     let graph = Graph::new(pools.clone());
-    let took = t.elapsed();
-    println!("took {}ms to build graph", took.as_millis());
+    //let took = t.elapsed();
+    //println!("took {}ms to build graph", took.as_millis());
 
 
     //let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
     let yfi = "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e".parse::<Address>().unwrap();
 
     let t = Instant::now();
-    let g = graph.find_path(&yfi, &yfi).await.unwrap();
+    let g = graph.find_path(&yfi, &yfi).await;
     let gt = t.elapsed();
 
 
-    println!("took {}ms to search finding {} paths with a maxlength of {}", gt.as_millis(), g.len(), MAXLEN);
+    println!("took {}ms to search finding {} paths with a maxlength of {}", gt.as_millis(), 8, MAXLEN);
     
 
 //     let now = Instant::now();
