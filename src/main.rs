@@ -5,7 +5,7 @@ use std::{
     io,
     collections::{HashMap, VecDeque},
     sync::{Arc, Mutex},
-    time::Instant,
+    time::Instant, path,
 };
 use ethers::types::{Address, U256};
 use serde::{Serialize, Deserialize};
@@ -271,7 +271,7 @@ impl PartialEq for Pool {
     }
    
 }
-
+#[derive(Clone)]
 struct Graph<P, A, I> {
     pools: Vec<P>,
     tokens: AHashMap<A, I>,
@@ -346,87 +346,104 @@ impl Graph<Pool, Address, usize> {
 
     }
 
-    async fn find_path (&self, start: &Address, finish: &Address) -> Option<Vec<Path>> {
+    fn find_path<'a> (&self, graph: Arc<Self>, start: &Address, finish: &Address) -> Option<Vec<Path<'a>>> {
+	let target_index: &usize;
+	match self.tokens.get(finish) {
+	    Some(i) => {target_index = i}
+	    None => {return None}
+	}
+	
+	let g = Arc::clone(&graph);
+	let token_index: &usize;
+	match g.tokens.get(start) {
+	    Some(i) => {token_index = i}
+	    None => {return None}
+	
+	}
+
 	let mut stack: Vec<Path> = Vec::with_capacity(100000);
 	let mut foundpaths: Vec<Path> = Vec::with_capacity(100000);
-	if let Some(target_index) = self.tokens.get(finish) {
-	    if let Some(token_index) = self.tokens.get(start) {
-		if let Some(pool_indices) = self.ttp.get(token_index) {
-		    for pool_index in pool_indices.iter() {
-			let step = PathStep{pool: pool_index, token_in: token_index, token_out: self.token_out(*pool_index, *token_index)};
-			if step.token_out == target_index {
-			    foundpaths.push(Path{steps: vec![step]});
-			} else {
-			    let mut steps: Vec<PathStep> = Vec::with_capacity(MAXLEN);
-			    steps.push(step);
-			    stack.push(Path{steps});
-			}
-		    }
 
-		} else {
-		    return None;
-		}
+	let pool_indices: &Vec<usize>;
+	
+	let g = Arc::clone(&graph);
+	match g.ttp.get(token_index) {
+	    Some(v) => {pool_indices = v}
+	    None => {return None}
+	}
+	for pool_index in pool_indices.iter() {
+	    let step = PathStep{pool: pool_index, token_in: token_index, token_out: &token_out(Arc::clone(&graph).ptt.clone(), *pool_index, *token_index)};
+	    if step.token_out == target_index {
+		foundpaths.push(Path{steps: vec![step]});
 	    } else {
-		return None;
+		let mut steps: Vec<PathStep> = Vec::with_capacity(MAXLEN);
+		steps.push(step);
+		stack.push(Path{steps});
 	    }
-	    let stack = Arc::new(Mutex::new(stack));
-	    let found_paths = Arc::new(Mutex::new(foundpaths));
-	    let mut handles = Vec::with_capacity(3);
-	    for _ in 0..2 {
-		let stack = Arc::clone(&stack);
-		let found_paths = Arc::clone(&found_paths);
-		
-		handles.push(std::thread::spawn(move || {pathing(stack, found_paths, self, target_index)}))
-	    }
-	    for h in handles {
-		let _ = h.join();
-	    }
-	    let f: Vec<Path> = (*found_paths.lock().unwrap()).to_vec();
-	    return Some(f);
-	
-	} else {
-	    return None;
 	}
-	
-    }
+	let stack = Arc::new(Mutex::new(stack));
+	let found_paths = Arc::new(Mutex::new(foundpaths));
+	//let mut handles = Vec::with_capacity(3);
+	for _ in 0..2 {
+	    let stack = Arc::clone(&stack);
+	    let found_paths = Arc::clone(&found_paths);
+	    let graph = Arc::clone(&graph);
+	    
+	   // handles.push(std::thread::spawn(move || {pathing(stack, found_paths, graph, target_index)}));
+	}
+	// for h in handles {
+	//     let _ = h.join().unwrap();
+	// }
+	let f: Vec<Path> = (*found_paths.lock().unwrap()).to_vec();
+	return Some(f);
 
-    fn token_out(&self, pool: usize, token_in: usize) -> &usize {
-	if self.ptt[pool][0] == token_in {
-	    return &self.ptt[pool][1];
-	} else {
-	    return &self.ptt[pool][0];
-	}
+    }
+   
+
+}
+
+fn token_out<'a> (ptt: Vec<[usize; 2]>, pool: usize, token_in: usize) -> usize {
+    if ptt[pool][0] == token_in {
+	return ptt[pool][1];
+    } else {
+	return ptt[pool][0];
     }
 }
 
-fn pathing<'a> (stack: Arc<Mutex<Vec<Path<'a>>>>, found_paths: Arc<Mutex<Vec<Path<'a>>>>, graph: &'a Graph<Pool, Address, usize>, target_index: &usize) {
+
+fn pathing<'a> (stack: Arc<Mutex<Vec<Path<'a>>>>, found_paths: Arc<Mutex<Vec<Path<'a>>>>, graph: Arc<Graph<Pool, Address, usize>>, target_index: &usize) {
     loop {
-	if let Some(path) = stack.lock().unwrap().pop() {
-	    let last = path.steps.last().unwrap();
-	    if let Some(pools) = graph.ttp.get(last.token_out) {
-		for pool in pools.iter() {
-		    if !path.contains(pool) {
-			let token_out = graph.token_out(*pool, *last.token_out);
-			if !path.used_token(token_out) {
-			    let mut p = path.clone();
-			    let step = PathStep{pool, token_in: last.token_out, token_out};
-			    p.steps.push(step);
-			    if p.steps.last().unwrap().token_out == target_index {
-				found_paths.lock().unwrap().push(p);
-			    } else {
-				if p.steps.len() < MAXLEN {
-				    stack.lock().unwrap().push(p);
-				}
-			    }
+	let path: Path;
+	match stack.lock().unwrap().pop() {
+	    Some(p) => {path = p}
+	    None => {break;}
+	}
+	let last: &PathStep = path.steps.last().unwrap();
+	let pools: &Vec<usize>;
+	match graph.ttp.get(last.token_out) {
+	    Some(p) => {pools = p}
+	    None => {break}
+	}
+	for pool in pools.iter() {
+	    if !path.contains(pool) {
+		let token_out = token_out(graph.ptt.clone(), *pool, *last.token_out);
+		if !path.used_token(&token_out) {
+		    let mut p = path.clone();
+		    let step = PathStep{pool, token_in: last.token_out, token_out: &token_out};
+		    p.steps.push(step);
+		    if p.steps.last().unwrap().token_out == target_index {
+			found_paths.lock().unwrap().push(p);
+		    } else {
+			if p.steps.len() < MAXLEN {
+			    stack.lock().unwrap().push(p);
 			}
 		    }
-		}	
+		}
 	    }
-	}  else {
-	    break;
-	}	
+	}
     }
 }
+
 #[derive(Clone)]
 struct Path <'a> {
     steps: Vec<PathStep<'a>>
@@ -554,7 +571,7 @@ async fn main() -> eyre::Result<()> {
 
     // let amount = U256::from_dec_str("100000").unwrap();
     //let t = Instant::now();
-    let graph = Graph::new(pools.clone());
+     let graph = Graph::new(pools.clone());
     //let took = t.elapsed();
     //println!("took {}ms to build graph", took.as_millis());
 
@@ -562,8 +579,9 @@ async fn main() -> eyre::Result<()> {
     //let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
     let yfi = "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e".parse::<Address>().unwrap();
 
+    
     let t = Instant::now();
-    let g = graph.find_path(&yfi, &yfi).await;
+    let g = graph.find_path(Arc::new(graph.clone()), &yfi, &yfi);
     let gt = t.elapsed();
 
 
