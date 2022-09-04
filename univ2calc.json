@@ -1,0 +1,3498 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "name": "_pool",
+          "type": "address"
+        },
+        {
+          "name": "zeroForOne",
+          "type": "bool"
+        },
+        {
+          "name": "amountIn",
+          "type": "uint256"
+        }
+      ],
+      "name": "calc_univ2_amountOut",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "allSourcePaths": {
+    "0": "contracts/univ2calc.vy"
+  },
+  "ast": {
+    "ast_type": "Module",
+    "body": [
+      {
+        "ast_type": "InterfaceDef",
+        "body": [
+          {
+            "args": {
+              "args": [],
+              "ast_type": "arguments",
+              "col_offset": 4,
+              "default": null,
+              "defaults": [],
+              "end_col_offset": 7,
+              "end_lineno": 3,
+              "lineno": 3,
+              "node_id": 3,
+              "src": "42:3:0"
+            },
+            "ast_type": "FunctionDef",
+            "body": [
+              {
+                "ast_type": "Expr",
+                "col_offset": 53,
+                "end_col_offset": 57,
+                "end_lineno": 3,
+                "lineno": 3,
+                "node_id": 4,
+                "src": "91:4:0",
+                "value": {
+                  "ast_type": "Name",
+                  "col_offset": 53,
+                  "end_col_offset": 57,
+                  "end_lineno": 3,
+                  "id": "view",
+                  "lineno": 3,
+                  "node_id": 5,
+                  "src": "91:4:0"
+                }
+              }
+            ],
+            "col_offset": 4,
+            "decorator_list": [],
+            "doc_string": null,
+            "end_col_offset": 57,
+            "end_lineno": 3,
+            "lineno": 3,
+            "name": "getReserves",
+            "node_id": 2,
+            "pos": null,
+            "returns": {
+              "ast_type": "Tuple",
+              "col_offset": 25,
+              "elements": [
+                {
+                  "ast_type": "Name",
+                  "col_offset": 26,
+                  "end_col_offset": 33,
+                  "end_lineno": 3,
+                  "id": "uint112",
+                  "lineno": 3,
+                  "node_id": 8,
+                  "src": "64:7:0"
+                },
+                {
+                  "ast_type": "Name",
+                  "col_offset": 35,
+                  "end_col_offset": 42,
+                  "end_lineno": 3,
+                  "id": "uint112",
+                  "lineno": 3,
+                  "node_id": 10,
+                  "src": "73:7:0"
+                },
+                {
+                  "ast_type": "Name",
+                  "col_offset": 44,
+                  "end_col_offset": 50,
+                  "end_lineno": 3,
+                  "id": "uint32",
+                  "lineno": 3,
+                  "node_id": 12,
+                  "src": "82:6:0"
+                }
+              ],
+              "end_col_offset": 51,
+              "end_lineno": 3,
+              "lineno": 3,
+              "node_id": 7,
+              "src": "63:26:0"
+            },
+            "src": "42:53:0"
+          }
+        ],
+        "col_offset": 0,
+        "end_col_offset": 57,
+        "end_lineno": 3,
+        "lineno": 2,
+        "name": "IUni2Pool",
+        "node_id": 1,
+        "src": "17:78:0"
+      },
+      {
+        "args": {
+          "args": [
+            {
+              "annotation": {
+                "ast_type": "Name",
+                "col_offset": 32,
+                "end_col_offset": 39,
+                "end_lineno": 7,
+                "id": "address",
+                "lineno": 7,
+                "node_id": 18,
+                "src": "145:7:0"
+              },
+              "arg": "_pool",
+              "ast_type": "arg",
+              "col_offset": 25,
+              "end_col_offset": 39,
+              "end_lineno": 7,
+              "lineno": 7,
+              "node_id": 17,
+              "src": "138:14:0"
+            },
+            {
+              "annotation": {
+                "ast_type": "Name",
+                "col_offset": 53,
+                "end_col_offset": 57,
+                "end_lineno": 7,
+                "id": "bool",
+                "lineno": 7,
+                "node_id": 21,
+                "src": "166:4:0"
+              },
+              "arg": "zeroForOne",
+              "ast_type": "arg",
+              "col_offset": 41,
+              "end_col_offset": 57,
+              "end_lineno": 7,
+              "lineno": 7,
+              "node_id": 20,
+              "src": "154:16:0"
+            },
+            {
+              "annotation": {
+                "ast_type": "Name",
+                "col_offset": 69,
+                "end_col_offset": 76,
+                "end_lineno": 7,
+                "id": "uint256",
+                "lineno": 7,
+                "node_id": 24,
+                "src": "182:7:0"
+              },
+              "arg": "amountIn",
+              "ast_type": "arg",
+              "col_offset": 59,
+              "end_col_offset": 76,
+              "end_lineno": 7,
+              "lineno": 7,
+              "node_id": 23,
+              "src": "172:17:0"
+            }
+          ],
+          "ast_type": "arguments",
+          "col_offset": 25,
+          "default": null,
+          "defaults": [],
+          "end_col_offset": 76,
+          "end_lineno": 7,
+          "lineno": 7,
+          "node_id": 16,
+          "src": "138:51:0"
+        },
+        "ast_type": "FunctionDef",
+        "body": [
+          {
+            "annotation": {
+              "ast_type": "Name",
+              "col_offset": 10,
+              "end_col_offset": 19,
+              "end_lineno": 8,
+              "id": "IUni2Pool",
+              "lineno": 8,
+              "node_id": 29,
+              "src": "215:9:0"
+            },
+            "ast_type": "AnnAssign",
+            "col_offset": 4,
+            "end_col_offset": 38,
+            "end_lineno": 8,
+            "lineno": 8,
+            "node_id": 26,
+            "simple": 1,
+            "src": "209:34:0",
+            "target": {
+              "ast_type": "Name",
+              "col_offset": 4,
+              "end_col_offset": 8,
+              "end_lineno": 8,
+              "id": "pool",
+              "lineno": 8,
+              "node_id": 27,
+              "src": "209:4:0"
+            },
+            "value": {
+              "args": [
+                {
+                  "ast_type": "Name",
+                  "col_offset": 32,
+                  "end_col_offset": 37,
+                  "end_lineno": 8,
+                  "id": "_pool",
+                  "lineno": 8,
+                  "node_id": 34,
+                  "src": "237:5:0"
+                }
+              ],
+              "ast_type": "Call",
+              "col_offset": 22,
+              "end_col_offset": 38,
+              "end_lineno": 8,
+              "func": {
+                "ast_type": "Name",
+                "col_offset": 22,
+                "end_col_offset": 31,
+                "end_lineno": 8,
+                "id": "IUni2Pool",
+                "lineno": 8,
+                "node_id": 32,
+                "src": "227:9:0"
+              },
+              "keyword": null,
+              "keywords": [],
+              "lineno": 8,
+              "node_id": 31,
+              "src": "227:16:0"
+            }
+          },
+          {
+            "annotation": {
+              "ast_type": "Name",
+              "col_offset": 14,
+              "end_col_offset": 21,
+              "end_lineno": 10,
+              "id": "uint112",
+              "lineno": 10,
+              "node_id": 39,
+              "src": "263:7:0"
+            },
+            "ast_type": "AnnAssign",
+            "col_offset": 4,
+            "end_col_offset": 25,
+            "end_lineno": 10,
+            "lineno": 10,
+            "node_id": 36,
+            "simple": 1,
+            "src": "253:21:0",
+            "target": {
+              "ast_type": "Name",
+              "col_offset": 4,
+              "end_col_offset": 12,
+              "end_lineno": 10,
+              "id": "reserve0",
+              "lineno": 10,
+              "node_id": 37,
+              "src": "253:8:0"
+            },
+            "value": {
+              "ast_type": "Int",
+              "col_offset": 24,
+              "end_col_offset": 25,
+              "end_lineno": 10,
+              "lineno": 10,
+              "node_id": 41,
+              "src": "273:1:0",
+              "value": 0
+            }
+          },
+          {
+            "annotation": {
+              "ast_type": "Name",
+              "col_offset": 14,
+              "end_col_offset": 21,
+              "end_lineno": 11,
+              "id": "uint112",
+              "lineno": 11,
+              "node_id": 45,
+              "src": "289:7:0"
+            },
+            "ast_type": "AnnAssign",
+            "col_offset": 4,
+            "end_col_offset": 25,
+            "end_lineno": 11,
+            "lineno": 11,
+            "node_id": 42,
+            "simple": 1,
+            "src": "279:21:0",
+            "target": {
+              "ast_type": "Name",
+              "col_offset": 4,
+              "end_col_offset": 12,
+              "end_lineno": 11,
+              "id": "reserve1",
+              "lineno": 11,
+              "node_id": 43,
+              "src": "279:8:0"
+            },
+            "value": {
+              "ast_type": "Int",
+              "col_offset": 24,
+              "end_col_offset": 25,
+              "end_lineno": 11,
+              "lineno": 11,
+              "node_id": 47,
+              "src": "299:1:0",
+              "value": 0
+            }
+          },
+          {
+            "annotation": {
+              "ast_type": "Name",
+              "col_offset": 24,
+              "end_col_offset": 30,
+              "end_lineno": 12,
+              "id": "uint32",
+              "lineno": 12,
+              "node_id": 51,
+              "src": "325:6:0"
+            },
+            "ast_type": "AnnAssign",
+            "col_offset": 4,
+            "end_col_offset": 34,
+            "end_lineno": 12,
+            "lineno": 12,
+            "node_id": 48,
+            "simple": 1,
+            "src": "305:30:0",
+            "target": {
+              "ast_type": "Name",
+              "col_offset": 4,
+              "end_col_offset": 22,
+              "end_lineno": 12,
+              "id": "blockTimestamplast",
+              "lineno": 12,
+              "node_id": 49,
+              "src": "305:18:0"
+            },
+            "value": {
+              "ast_type": "Int",
+              "col_offset": 33,
+              "end_col_offset": 34,
+              "end_lineno": 12,
+              "lineno": 12,
+              "node_id": 53,
+              "src": "334:1:0",
+              "value": 0
+            }
+          },
+          {
+            "ast_type": "Assign",
+            "col_offset": 4,
+            "end_col_offset": 63,
+            "end_lineno": 13,
+            "lineno": 13,
+            "node_id": 54,
+            "src": "340:59:0",
+            "target": {
+              "ast_type": "Tuple",
+              "col_offset": 4,
+              "elements": [
+                {
+                  "ast_type": "Name",
+                  "col_offset": 4,
+                  "end_col_offset": 12,
+                  "end_lineno": 13,
+                  "id": "reserve0",
+                  "lineno": 13,
+                  "node_id": 56,
+                  "src": "340:8:0"
+                },
+                {
+                  "ast_type": "Name",
+                  "col_offset": 14,
+                  "end_col_offset": 22,
+                  "end_lineno": 13,
+                  "id": "reserve1",
+                  "lineno": 13,
+                  "node_id": 58,
+                  "src": "350:8:0"
+                },
+                {
+                  "ast_type": "Name",
+                  "col_offset": 24,
+                  "end_col_offset": 42,
+                  "end_lineno": 13,
+                  "id": "blockTimestamplast",
+                  "lineno": 13,
+                  "node_id": 60,
+                  "src": "360:18:0"
+                }
+              ],
+              "end_col_offset": 42,
+              "end_lineno": 13,
+              "lineno": 13,
+              "node_id": 55,
+              "src": "340:38:0"
+            },
+            "value": {
+              "args": [],
+              "ast_type": "Call",
+              "col_offset": 45,
+              "end_col_offset": 63,
+              "end_lineno": 13,
+              "func": {
+                "ast_type": "Attribute",
+                "attr": "getReserves",
+                "col_offset": 45,
+                "end_col_offset": 61,
+                "end_lineno": 13,
+                "lineno": 13,
+                "node_id": 64,
+                "src": "381:16:0",
+                "value": {
+                  "ast_type": "Name",
+                  "col_offset": 45,
+                  "end_col_offset": 49,
+                  "end_lineno": 13,
+                  "id": "pool",
+                  "lineno": 13,
+                  "node_id": 65,
+                  "src": "381:4:0"
+                }
+              },
+              "keyword": null,
+              "keywords": [],
+              "lineno": 13,
+              "node_id": 63,
+              "src": "381:18:0"
+            }
+          },
+          {
+            "annotation": {
+              "ast_type": "Name",
+              "col_offset": 16,
+              "end_col_offset": 23,
+              "end_lineno": 15,
+              "id": "uint256",
+              "lineno": 15,
+              "node_id": 71,
+              "src": "417:7:0"
+            },
+            "ast_type": "AnnAssign",
+            "col_offset": 4,
+            "end_col_offset": 27,
+            "end_lineno": 15,
+            "lineno": 15,
+            "node_id": 68,
+            "simple": 1,
+            "src": "405:23:0",
+            "target": {
+              "ast_type": "Name",
+              "col_offset": 4,
+              "end_col_offset": 14,
+              "end_lineno": 15,
+              "id": "reserveOut",
+              "lineno": 15,
+              "node_id": 69,
+              "src": "405:10:0"
+            },
+            "value": {
+              "ast_type": "Int",
+              "col_offset": 26,
+              "end_col_offset": 27,
+              "end_lineno": 15,
+              "lineno": 15,
+              "node_id": 73,
+              "src": "427:1:0",
+              "value": 0
+            }
+          },
+          {
+            "annotation": {
+              "ast_type": "Name",
+              "col_offset": 15,
+              "end_col_offset": 22,
+              "end_lineno": 16,
+              "id": "uint256",
+              "lineno": 16,
+              "node_id": 77,
+              "src": "444:7:0"
+            },
+            "ast_type": "AnnAssign",
+            "col_offset": 4,
+            "end_col_offset": 26,
+            "end_lineno": 16,
+            "lineno": 16,
+            "node_id": 74,
+            "simple": 1,
+            "src": "433:22:0",
+            "target": {
+              "ast_type": "Name",
+              "col_offset": 4,
+              "end_col_offset": 13,
+              "end_lineno": 16,
+              "id": "reserveIn",
+              "lineno": 16,
+              "node_id": 75,
+              "src": "433:9:0"
+            },
+            "value": {
+              "ast_type": "Int",
+              "col_offset": 25,
+              "end_col_offset": 26,
+              "end_lineno": 16,
+              "lineno": 16,
+              "node_id": 79,
+              "src": "454:1:0",
+              "value": 0
+            }
+          },
+          {
+            "ast_type": "If",
+            "body": [
+              {
+                "ast_type": "Assign",
+                "col_offset": 7,
+                "end_col_offset": 46,
+                "end_lineno": 18,
+                "lineno": 18,
+                "node_id": 83,
+                "src": "484:39:0",
+                "target": {
+                  "ast_type": "Name",
+                  "col_offset": 7,
+                  "end_col_offset": 17,
+                  "end_lineno": 18,
+                  "id": "reserveOut",
+                  "lineno": 18,
+                  "node_id": 84,
+                  "src": "484:10:0"
+                },
+                "value": {
+                  "args": [
+                    {
+                      "ast_type": "Name",
+                      "col_offset": 28,
+                      "end_col_offset": 36,
+                      "end_lineno": 18,
+                      "id": "reserve0",
+                      "lineno": 18,
+                      "node_id": 89,
+                      "src": "505:8:0"
+                    },
+                    {
+                      "ast_type": "Name",
+                      "col_offset": 38,
+                      "end_col_offset": 45,
+                      "end_lineno": 18,
+                      "id": "uint256",
+                      "lineno": 18,
+                      "node_id": 91,
+                      "src": "515:7:0"
+                    }
+                  ],
+                  "ast_type": "Call",
+                  "col_offset": 20,
+                  "end_col_offset": 46,
+                  "end_lineno": 18,
+                  "func": {
+                    "ast_type": "Name",
+                    "col_offset": 20,
+                    "end_col_offset": 27,
+                    "end_lineno": 18,
+                    "id": "convert",
+                    "lineno": 18,
+                    "node_id": 87,
+                    "src": "497:7:0"
+                  },
+                  "keyword": null,
+                  "keywords": [],
+                  "lineno": 18,
+                  "node_id": 86,
+                  "src": "497:26:0"
+                }
+              },
+              {
+                "ast_type": "Assign",
+                "col_offset": 7,
+                "end_col_offset": 45,
+                "end_lineno": 19,
+                "lineno": 19,
+                "node_id": 93,
+                "src": "531:38:0",
+                "target": {
+                  "ast_type": "Name",
+                  "col_offset": 7,
+                  "end_col_offset": 16,
+                  "end_lineno": 19,
+                  "id": "reserveIn",
+                  "lineno": 19,
+                  "node_id": 94,
+                  "src": "531:9:0"
+                },
+                "value": {
+                  "args": [
+                    {
+                      "ast_type": "Name",
+                      "col_offset": 27,
+                      "end_col_offset": 35,
+                      "end_lineno": 19,
+                      "id": "reserve1",
+                      "lineno": 19,
+                      "node_id": 99,
+                      "src": "551:8:0"
+                    },
+                    {
+                      "ast_type": "Name",
+                      "col_offset": 37,
+                      "end_col_offset": 44,
+                      "end_lineno": 19,
+                      "id": "uint256",
+                      "lineno": 19,
+                      "node_id": 101,
+                      "src": "561:7:0"
+                    }
+                  ],
+                  "ast_type": "Call",
+                  "col_offset": 19,
+                  "end_col_offset": 45,
+                  "end_lineno": 19,
+                  "func": {
+                    "ast_type": "Name",
+                    "col_offset": 19,
+                    "end_col_offset": 26,
+                    "end_lineno": 19,
+                    "id": "convert",
+                    "lineno": 19,
+                    "node_id": 97,
+                    "src": "543:7:0"
+                  },
+                  "keyword": null,
+                  "keywords": [],
+                  "lineno": 19,
+                  "node_id": 96,
+                  "src": "543:26:0"
+                }
+              }
+            ],
+            "col_offset": 4,
+            "end_col_offset": 45,
+            "end_lineno": 22,
+            "lineno": 17,
+            "node_id": 80,
+            "orelse": [
+              {
+                "ast_type": "Assign",
+                "col_offset": 7,
+                "end_col_offset": 46,
+                "end_lineno": 21,
+                "lineno": 21,
+                "node_id": 103,
+                "src": "587:39:0",
+                "target": {
+                  "ast_type": "Name",
+                  "col_offset": 7,
+                  "end_col_offset": 17,
+                  "end_lineno": 21,
+                  "id": "reserveOut",
+                  "lineno": 21,
+                  "node_id": 104,
+                  "src": "587:10:0"
+                },
+                "value": {
+                  "args": [
+                    {
+                      "ast_type": "Name",
+                      "col_offset": 28,
+                      "end_col_offset": 36,
+                      "end_lineno": 21,
+                      "id": "reserve1",
+                      "lineno": 21,
+                      "node_id": 109,
+                      "src": "608:8:0"
+                    },
+                    {
+                      "ast_type": "Name",
+                      "col_offset": 38,
+                      "end_col_offset": 45,
+                      "end_lineno": 21,
+                      "id": "uint256",
+                      "lineno": 21,
+                      "node_id": 111,
+                      "src": "618:7:0"
+                    }
+                  ],
+                  "ast_type": "Call",
+                  "col_offset": 20,
+                  "end_col_offset": 46,
+                  "end_lineno": 21,
+                  "func": {
+                    "ast_type": "Name",
+                    "col_offset": 20,
+                    "end_col_offset": 27,
+                    "end_lineno": 21,
+                    "id": "convert",
+                    "lineno": 21,
+                    "node_id": 107,
+                    "src": "600:7:0"
+                  },
+                  "keyword": null,
+                  "keywords": [],
+                  "lineno": 21,
+                  "node_id": 106,
+                  "src": "600:26:0"
+                }
+              },
+              {
+                "ast_type": "Assign",
+                "col_offset": 7,
+                "end_col_offset": 45,
+                "end_lineno": 22,
+                "lineno": 22,
+                "node_id": 113,
+                "src": "634:38:0",
+                "target": {
+                  "ast_type": "Name",
+                  "col_offset": 7,
+                  "end_col_offset": 16,
+                  "end_lineno": 22,
+                  "id": "reserveIn",
+                  "lineno": 22,
+                  "node_id": 114,
+                  "src": "634:9:0"
+                },
+                "value": {
+                  "args": [
+                    {
+                      "ast_type": "Name",
+                      "col_offset": 27,
+                      "end_col_offset": 35,
+                      "end_lineno": 22,
+                      "id": "reserve0",
+                      "lineno": 22,
+                      "node_id": 119,
+                      "src": "654:8:0"
+                    },
+                    {
+                      "ast_type": "Name",
+                      "col_offset": 37,
+                      "end_col_offset": 44,
+                      "end_lineno": 22,
+                      "id": "uint256",
+                      "lineno": 22,
+                      "node_id": 121,
+                      "src": "664:7:0"
+                    }
+                  ],
+                  "ast_type": "Call",
+                  "col_offset": 19,
+                  "end_col_offset": 45,
+                  "end_lineno": 22,
+                  "func": {
+                    "ast_type": "Name",
+                    "col_offset": 19,
+                    "end_col_offset": 26,
+                    "end_lineno": 22,
+                    "id": "convert",
+                    "lineno": 22,
+                    "node_id": 117,
+                    "src": "646:7:0"
+                  },
+                  "keyword": null,
+                  "keywords": [],
+                  "lineno": 22,
+                  "node_id": 116,
+                  "src": "646:26:0"
+                }
+              }
+            ],
+            "src": "460:212:0",
+            "test": {
+              "ast_type": "Name",
+              "col_offset": 8,
+              "end_col_offset": 18,
+              "end_lineno": 17,
+              "id": "zeroForOne",
+              "lineno": 17,
+              "node_id": 81,
+              "src": "464:10:0"
+            }
+          },
+          {
+            "annotation": {
+              "ast_type": "Name",
+              "col_offset": 21,
+              "end_col_offset": 28,
+              "end_lineno": 23,
+              "id": "uint256",
+              "lineno": 23,
+              "node_id": 126,
+              "src": "694:7:0"
+            },
+            "ast_type": "AnnAssign",
+            "col_offset": 4,
+            "end_col_offset": 45,
+            "end_lineno": 23,
+            "lineno": 23,
+            "node_id": 123,
+            "simple": 1,
+            "src": "677:41:0",
+            "target": {
+              "ast_type": "Name",
+              "col_offset": 4,
+              "end_col_offset": 19,
+              "end_lineno": 23,
+              "id": "amountInWithFee",
+              "lineno": 23,
+              "node_id": 124,
+              "src": "677:15:0"
+            },
+            "value": {
+              "ast_type": "BinOp",
+              "col_offset": 31,
+              "end_col_offset": 45,
+              "end_lineno": 23,
+              "left": {
+                "ast_type": "Name",
+                "col_offset": 31,
+                "end_col_offset": 39,
+                "end_lineno": 23,
+                "id": "amountIn",
+                "lineno": 23,
+                "node_id": 129,
+                "src": "704:8:0"
+              },
+              "lineno": 23,
+              "node_id": 128,
+              "op": {
+                "ast_type": "Mult",
+                "col_offset": 31,
+                "end_col_offset": 45,
+                "end_lineno": 23,
+                "lineno": 23,
+                "node_id": 192,
+                "src": "704:14:0"
+              },
+              "right": {
+                "ast_type": "Int",
+                "col_offset": 42,
+                "end_col_offset": 45,
+                "end_lineno": 23,
+                "lineno": 23,
+                "node_id": 132,
+                "src": "715:3:0",
+                "value": 977
+              },
+              "src": "704:14:0"
+            }
+          },
+          {
+            "annotation": {
+              "ast_type": "Name",
+              "col_offset": 15,
+              "end_col_offset": 22,
+              "end_lineno": 24,
+              "id": "uint256",
+              "lineno": 24,
+              "node_id": 136,
+              "src": "734:7:0"
+            },
+            "ast_type": "AnnAssign",
+            "col_offset": 4,
+            "end_col_offset": 96,
+            "end_lineno": 24,
+            "lineno": 24,
+            "node_id": 133,
+            "simple": 1,
+            "src": "723:92:0",
+            "target": {
+              "ast_type": "Name",
+              "col_offset": 4,
+              "end_col_offset": 13,
+              "end_lineno": 24,
+              "id": "amountOut",
+              "lineno": 24,
+              "node_id": 134,
+              "src": "723:9:0"
+            },
+            "value": {
+              "ast_type": "BinOp",
+              "col_offset": 25,
+              "end_col_offset": 96,
+              "end_lineno": 24,
+              "left": {
+                "ast_type": "BinOp",
+                "col_offset": 26,
+                "end_col_offset": 54,
+                "end_lineno": 24,
+                "left": {
+                  "ast_type": "Name",
+                  "col_offset": 26,
+                  "end_col_offset": 41,
+                  "end_lineno": 24,
+                  "id": "amountInWithFee",
+                  "lineno": 24,
+                  "node_id": 140,
+                  "src": "745:15:0"
+                },
+                "lineno": 24,
+                "node_id": 139,
+                "op": {
+                  "ast_type": "Mult",
+                  "col_offset": 26,
+                  "end_col_offset": 54,
+                  "end_lineno": 24,
+                  "lineno": 24,
+                  "node_id": 192,
+                  "src": "745:28:0"
+                },
+                "right": {
+                  "ast_type": "Name",
+                  "col_offset": 44,
+                  "end_col_offset": 54,
+                  "end_lineno": 24,
+                  "id": "reserveOut",
+                  "lineno": 24,
+                  "node_id": 143,
+                  "src": "763:10:0"
+                },
+                "src": "745:28:0"
+              },
+              "lineno": 24,
+              "node_id": 138,
+              "op": {
+                "ast_type": "Div",
+                "col_offset": 25,
+                "end_col_offset": 96,
+                "end_lineno": 24,
+                "lineno": 24,
+                "node_id": 145,
+                "src": "744:71:0"
+              },
+              "right": {
+                "ast_type": "BinOp",
+                "col_offset": 59,
+                "end_col_offset": 95,
+                "end_lineno": 24,
+                "left": {
+                  "ast_type": "BinOp",
+                  "col_offset": 60,
+                  "end_col_offset": 76,
+                  "end_lineno": 24,
+                  "left": {
+                    "ast_type": "Name",
+                    "col_offset": 60,
+                    "end_col_offset": 69,
+                    "end_lineno": 24,
+                    "id": "reserveIn",
+                    "lineno": 24,
+                    "node_id": 148,
+                    "src": "779:9:0"
+                  },
+                  "lineno": 24,
+                  "node_id": 147,
+                  "op": {
+                    "ast_type": "Mult",
+                    "col_offset": 60,
+                    "end_col_offset": 76,
+                    "end_lineno": 24,
+                    "lineno": 24,
+                    "node_id": 192,
+                    "src": "779:16:0"
+                  },
+                  "right": {
+                    "ast_type": "Int",
+                    "col_offset": 72,
+                    "end_col_offset": 76,
+                    "end_lineno": 24,
+                    "lineno": 24,
+                    "node_id": 151,
+                    "src": "791:4:0",
+                    "value": 1000
+                  },
+                  "src": "779:16:0"
+                },
+                "lineno": 24,
+                "node_id": 146,
+                "op": {
+                  "ast_type": "Add",
+                  "col_offset": 59,
+                  "end_col_offset": 95,
+                  "end_lineno": 24,
+                  "lineno": 24,
+                  "node_id": 169,
+                  "src": "778:36:0"
+                },
+                "right": {
+                  "ast_type": "Name",
+                  "col_offset": 80,
+                  "end_col_offset": 95,
+                  "end_lineno": 24,
+                  "id": "amountInWithFee",
+                  "lineno": 24,
+                  "node_id": 153,
+                  "src": "799:15:0"
+                },
+                "src": "778:36:0"
+              },
+              "src": "744:71:0"
+            }
+          },
+          {
+            "annotation": {
+              "ast_type": "Name",
+              "col_offset": 10,
+              "end_col_offset": 17,
+              "end_lineno": 25,
+              "id": "uint256",
+              "lineno": 25,
+              "node_id": 158,
+              "src": "826:7:0"
+            },
+            "ast_type": "AnnAssign",
+            "col_offset": 4,
+            "end_col_offset": 42,
+            "end_lineno": 25,
+            "lineno": 25,
+            "node_id": 155,
+            "simple": 1,
+            "src": "820:38:0",
+            "target": {
+              "ast_type": "Name",
+              "col_offset": 4,
+              "end_col_offset": 8,
+              "end_lineno": 25,
+              "id": "kpre",
+              "lineno": 25,
+              "node_id": 156,
+              "src": "820:4:0"
+            },
+            "value": {
+              "ast_type": "BinOp",
+              "col_offset": 20,
+              "end_col_offset": 42,
+              "end_lineno": 25,
+              "left": {
+                "ast_type": "Name",
+                "col_offset": 20,
+                "end_col_offset": 29,
+                "end_lineno": 25,
+                "id": "reserveIn",
+                "lineno": 25,
+                "node_id": 161,
+                "src": "836:9:0"
+              },
+              "lineno": 25,
+              "node_id": 160,
+              "op": {
+                "ast_type": "Mult",
+                "col_offset": 20,
+                "end_col_offset": 42,
+                "end_lineno": 25,
+                "lineno": 25,
+                "node_id": 192,
+                "src": "836:22:0"
+              },
+              "right": {
+                "ast_type": "Name",
+                "col_offset": 32,
+                "end_col_offset": 42,
+                "end_lineno": 25,
+                "id": "reserveOut",
+                "lineno": 25,
+                "node_id": 164,
+                "src": "848:10:0"
+              },
+              "src": "836:22:0"
+            }
+          },
+          {
+            "ast_type": "AugAssign",
+            "col_offset": 4,
+            "end_col_offset": 33,
+            "end_lineno": 27,
+            "lineno": 27,
+            "node_id": 166,
+            "op": {
+              "ast_type": "Add",
+              "col_offset": 4,
+              "end_col_offset": 33,
+              "end_lineno": 27,
+              "lineno": 27,
+              "node_id": 169,
+              "src": "864:29:0"
+            },
+            "src": "864:29:0",
+            "target": {
+              "ast_type": "Name",
+              "col_offset": 4,
+              "end_col_offset": 14,
+              "end_lineno": 27,
+              "id": "reserveOut",
+              "lineno": 27,
+              "node_id": 167,
+              "src": "864:10:0"
+            },
+            "value": {
+              "ast_type": "Name",
+              "col_offset": 18,
+              "end_col_offset": 33,
+              "end_lineno": 27,
+              "id": "amountInWithFee",
+              "lineno": 27,
+              "node_id": 170,
+              "src": "878:15:0"
+            }
+          },
+          {
+            "ast_type": "If",
+            "body": [
+              {
+                "ast_type": "AugAssign",
+                "col_offset": 7,
+                "end_col_offset": 29,
+                "end_lineno": 30,
+                "lineno": 30,
+                "node_id": 179,
+                "op": {
+                  "ast_type": "Sub",
+                  "col_offset": 7,
+                  "end_col_offset": 29,
+                  "end_lineno": 30,
+                  "lineno": 30,
+                  "node_id": 182,
+                  "src": "938:22:0"
+                },
+                "src": "938:22:0",
+                "target": {
+                  "ast_type": "Name",
+                  "col_offset": 7,
+                  "end_col_offset": 16,
+                  "end_lineno": 30,
+                  "id": "reserveIn",
+                  "lineno": 30,
+                  "node_id": 180,
+                  "src": "938:9:0"
+                },
+                "value": {
+                  "ast_type": "Name",
+                  "col_offset": 20,
+                  "end_col_offset": 29,
+                  "end_lineno": 30,
+                  "id": "amountOut",
+                  "lineno": 30,
+                  "node_id": 183,
+                  "src": "951:9:0"
+                }
+              }
+            ],
+            "col_offset": 4,
+            "end_col_offset": 15,
+            "end_lineno": 32,
+            "lineno": 29,
+            "node_id": 172,
+            "orelse": [
+              {
+                "ast_type": "Return",
+                "col_offset": 7,
+                "end_col_offset": 15,
+                "end_lineno": 32,
+                "lineno": 32,
+                "node_id": 185,
+                "src": "978:8:0",
+                "value": {
+                  "ast_type": "Int",
+                  "col_offset": 14,
+                  "end_col_offset": 15,
+                  "end_lineno": 32,
+                  "lineno": 32,
+                  "node_id": 186,
+                  "src": "985:1:0",
+                  "value": 0
+                }
+              }
+            ],
+            "src": "903:83:0",
+            "test": {
+              "ast_type": "Compare",
+              "col_offset": 8,
+              "end_col_offset": 29,
+              "end_lineno": 29,
+              "left": {
+                "ast_type": "Name",
+                "col_offset": 8,
+                "end_col_offset": 17,
+                "end_lineno": 29,
+                "id": "reserveIn",
+                "lineno": 29,
+                "node_id": 174,
+                "src": "907:9:0"
+              },
+              "lineno": 29,
+              "node_id": 173,
+              "op": {
+                "ast_type": "Gt",
+                "col_offset": 8,
+                "end_col_offset": 29,
+                "end_lineno": 29,
+                "lineno": 29,
+                "node_id": 176,
+                "src": "907:21:0"
+              },
+              "right": {
+                "ast_type": "Name",
+                "col_offset": 20,
+                "end_col_offset": 29,
+                "end_lineno": 29,
+                "id": "amountOut",
+                "lineno": 29,
+                "node_id": 177,
+                "src": "919:9:0"
+              },
+              "src": "907:21:0"
+            }
+          },
+          {
+            "ast_type": "If",
+            "body": [
+              {
+                "ast_type": "Return",
+                "col_offset": 7,
+                "end_col_offset": 15,
+                "end_lineno": 36,
+                "lineno": 36,
+                "node_id": 198,
+                "src": "1043:8:0",
+                "value": {
+                  "ast_type": "Int",
+                  "col_offset": 14,
+                  "end_col_offset": 15,
+                  "end_lineno": 36,
+                  "lineno": 36,
+                  "node_id": 199,
+                  "src": "1050:1:0",
+                  "value": 0
+                }
+              }
+            ],
+            "col_offset": 4,
+            "end_col_offset": 23,
+            "end_lineno": 38,
+            "lineno": 35,
+            "node_id": 187,
+            "orelse": [
+              {
+                "ast_type": "Return",
+                "col_offset": 7,
+                "end_col_offset": 23,
+                "end_lineno": 38,
+                "lineno": 38,
+                "node_id": 200,
+                "src": "1069:16:0",
+                "value": {
+                  "ast_type": "Name",
+                  "col_offset": 14,
+                  "end_col_offset": 23,
+                  "end_lineno": 38,
+                  "id": "amountOut",
+                  "lineno": 38,
+                  "node_id": 201,
+                  "src": "1076:9:0"
+                }
+              }
+            ],
+            "src": "997:88:0",
+            "test": {
+              "ast_type": "Compare",
+              "col_offset": 8,
+              "end_col_offset": 40,
+              "end_lineno": 35,
+              "left": {
+                "ast_type": "BinOp",
+                "col_offset": 9,
+                "end_col_offset": 31,
+                "end_lineno": 35,
+                "left": {
+                  "ast_type": "Name",
+                  "col_offset": 9,
+                  "end_col_offset": 18,
+                  "end_lineno": 35,
+                  "id": "reserveIn",
+                  "lineno": 35,
+                  "node_id": 190,
+                  "src": "1002:9:0"
+                },
+                "lineno": 35,
+                "node_id": 189,
+                "op": {
+                  "ast_type": "Mult",
+                  "col_offset": 9,
+                  "end_col_offset": 31,
+                  "end_lineno": 35,
+                  "lineno": 35,
+                  "node_id": 192,
+                  "src": "1002:22:0"
+                },
+                "right": {
+                  "ast_type": "Name",
+                  "col_offset": 21,
+                  "end_col_offset": 31,
+                  "end_lineno": 35,
+                  "id": "reserveOut",
+                  "lineno": 35,
+                  "node_id": 193,
+                  "src": "1014:10:0"
+                },
+                "src": "1002:22:0"
+              },
+              "lineno": 35,
+              "node_id": 188,
+              "op": {
+                "ast_type": "LtE",
+                "col_offset": 8,
+                "end_col_offset": 40,
+                "end_lineno": 35,
+                "lineno": 35,
+                "node_id": 195,
+                "src": "1001:32:0"
+              },
+              "right": {
+                "ast_type": "Name",
+                "col_offset": 36,
+                "end_col_offset": 40,
+                "end_lineno": 35,
+                "id": "kpre",
+                "lineno": 35,
+                "node_id": 196,
+                "src": "1029:4:0"
+              },
+              "src": "1001:32:0"
+            }
+          }
+        ],
+        "col_offset": 0,
+        "decorator_list": [
+          {
+            "ast_type": "Name",
+            "col_offset": 1,
+            "end_col_offset": 9,
+            "end_lineno": 5,
+            "id": "external",
+            "lineno": 5,
+            "node_id": 203,
+            "src": "98:8:0"
+          },
+          {
+            "ast_type": "Name",
+            "col_offset": 1,
+            "end_col_offset": 5,
+            "end_lineno": 6,
+            "id": "view",
+            "lineno": 6,
+            "node_id": 205,
+            "src": "108:4:0"
+          }
+        ],
+        "doc_string": null,
+        "end_col_offset": 23,
+        "end_lineno": 38,
+        "lineno": 7,
+        "name": "calc_univ2_amountOut",
+        "node_id": 15,
+        "pos": null,
+        "returns": {
+          "ast_type": "Name",
+          "col_offset": 82,
+          "end_col_offset": 89,
+          "end_lineno": 7,
+          "id": "uint256",
+          "lineno": 7,
+          "node_id": 207,
+          "src": "195:7:0"
+        },
+        "src": "113:972:0"
+      }
+    ],
+    "col_offset": 0,
+    "doc_string": null,
+    "end_col_offset": 23,
+    "end_lineno": 38,
+    "lineno": 1,
+    "name": "contracts/univ2calc.vy",
+    "node_id": 0,
+    "src": "0:1085:0"
+  },
+  "bytecode": "0x61023d6100116100003961023d610000f36003361161000c57610225565b60003560e01c3461022b5763a1e9ac508118610223576064361861022b576004358060a01c61022b576040526024358060011c61022b5760605260405160805260603660a037608051630902f1ac610100526060610100600461011c845afa61007a573d600060003e3d6000fd5b60603d1061022b57610100518060701c61022b5761018052610120518060701c61022b576101a052610140518060201c61022b576101c0526101809050805160a052602081015160c052604081015160e05250604036610100376060516100ee5760c0516101005260a051610120526100fd565b60a0516101005260c051610120525b6044356103d18102816103d182041861022b57905061014052610140516101005180820281158383830414171561022b5790509050610120516103e88102816103e882041861022b5790506101405180820182811061022b5790509050801561022b578082049050905061016052610120516101005180820281158383830414171561022b579050905061018052610100516101405180820182811061022b5790509050610100526101605161012051116101c65760006101a05260206101a0610221566101e1565b610120516101605180820382811161022b5790509050610120525b61018051610120516101005180820281158383830414171561022b5790509050111561021557602061016061022156610221565b60006101a05260206101a05bf35b505b60006000fd5b600080fda165767970657283000306000b",
+  "bytecodeSha1": "2b194bf8c6d66960554f61b6d386393aec4ccf98",
+  "compiler": {
+    "evm_version": "istanbul",
+    "version": "0.3.6"
+  },
+  "contractName": "univ2calc",
+  "coverageMap": {
+    "branches": {
+      "0": {
+        "univ2calc.calc_univ2_amountOut": {
+          "4": [
+            464,
+            474,
+            false
+          ],
+          "13": [
+            907,
+            928,
+            false
+          ],
+          "16": [
+            1001,
+            1033,
+            false
+          ]
+        }
+      }
+    },
+    "statements": {
+      "0": {
+        "univ2calc.calc_univ2_amountOut": {
+          "0": [
+            209,
+            243
+          ],
+          "1": [
+            253,
+            274
+          ],
+          "2": [
+            340,
+            399
+          ],
+          "3": [
+            405,
+            428
+          ],
+          "5": [
+            587,
+            626
+          ],
+          "6": [
+            634,
+            672
+          ],
+          "7": [
+            484,
+            523
+          ],
+          "8": [
+            531,
+            569
+          ],
+          "9": [
+            677,
+            718
+          ],
+          "10": [
+            723,
+            815
+          ],
+          "11": [
+            820,
+            858
+          ],
+          "12": [
+            864,
+            893
+          ],
+          "14": [
+            978,
+            986
+          ],
+          "15": [
+            938,
+            960
+          ],
+          "17": [
+            1069,
+            1085
+          ],
+          "18": [
+            1043,
+            1051
+          ]
+        }
+      }
+    }
+  },
+  "dependencies": [],
+  "deployedBytecode": "0x6003361161000c57610225565b60003560e01c3461022b5763a1e9ac508118610223576064361861022b576004358060a01c61022b576040526024358060011c61022b5760605260405160805260603660a037608051630902f1ac610100526060610100600461011c845afa61007a573d600060003e3d6000fd5b60603d1061022b57610100518060701c61022b5761018052610120518060701c61022b576101a052610140518060201c61022b576101c0526101809050805160a052602081015160c052604081015160e05250604036610100376060516100ee5760c0516101005260a051610120526100fd565b60a0516101005260c051610120525b6044356103d18102816103d182041861022b57905061014052610140516101005180820281158383830414171561022b5790509050610120516103e88102816103e882041861022b5790506101405180820182811061022b5790509050801561022b578082049050905061016052610120516101005180820281158383830414171561022b579050905061018052610100516101405180820182811061022b5790509050610100526101605161012051116101c65760006101a05260206101a0610221566101e1565b610120516101605180820382811161022b5790509050610120525b61018051610120516101005180820281158383830414171561022b5790509050111561021557602061016061022156610221565b60006101a05260206101a05bf35b505b60006000fd5b600080fda165767970657283000306000b",
+  "deployedSourceMap": "-1:-1:0:-;;;;:::-;;:::-;:::-;;;;;;;:::-;;;;;:::-;;;;;:::-;;;;;;;:::-;138:14;;-1:-1;;;;;;:::-;154:16;;227;-1:-1;;209:34;253:21;;;;381:4;:18;-1:-1;;;;;;;381:18;-1:-1;;;:::-;;;;;;;;:::-;;;;;:::-;;;;;;;:::-;;;;;;;;;:::-;;;;;;;;;:::-;;;;381:18;;340:59;-1:-1;340:8;-1:-1;;340:59;-1:-1;;350:8;-1:-1;;340:59;-1:-1;;360:18;-1:-1;340:59;405:23;;;;464:10;-1:-1;460:212;:::-;600:26;-1:-1;587:10;:39;646:26;-1:-1;634:9;:38;460:212;:::-;:::-;497:26;-1:-1;484:10;:39;543:26;-1:-1;531:9;:38;460:212::-;704:8;:14;715:3;704:14;-1:-1;704:14;715:3;-1:-1;;;;:::-;704:14;;677:41;;745:15;-1:-1;763:10;-1:-1;;;;;;;;;;;;;;:::-;;;745:28;;779:9;:16;791:4;779:16;-1:-1;779:16;791:4;-1:-1;;;;:::-;779:16;;799:15;-1:-1;;778:36;-1:-1;778:36;-1:-1;;;:::-;778:36;;;;-1:-1;;;:::-;;744:71;-1:-1;744:71;;;;723:92;;836:9;-1:-1;848:10;-1:-1;;;;;;;;;;;;;;:::-;;;836:22;;-1:-1;820:38;864:10;-1:-1;878:15;-1:-1;;;;;;;;:::-;;;864:29;;:10;:29;919:9;-1:-1;907:9;-1:-1;907:21;903:83;:::-;985:1;-1:-1;;;;;:::-;903:83;:::-;:::-;938:9;-1:-1;951:9;-1:-1;;;;;;;;:::-;;;938:22;;:9;:22;903:83::-;1029:4;-1:-1;1002:9;-1:-1;1014:10;-1:-1;;;;;;;;;;;;;;:::-;;;1002:22;;-1:-1;997:88;;:::-;-1:-1;1076:9;-1:-1;:::-;;997:88::-;:::-;1050:1;-1:-1;;;;:::-;;:::-;;:::-;;;;:::-;;;",
+  "language": "Vyper",
+  "natspec": {
+    "methods": {}
+  },
+  "offset": [
+    0,
+    1088
+  ],
+  "opcodes": "PUSH1 0x3 CALLDATASIZE GT PUSH2 0x0C JUMPI PUSH2 0x225 JUMP JUMPDEST PUSH1 0x0 CALLDATALOAD PUSH1 0xE0 SHR CALLVALUE PUSH2 0x22B JUMPI PUSH4 0xA1E9AC50 DUP2 XOR PUSH2 0x223 JUMPI PUSH1 0x64 CALLDATASIZE XOR PUSH2 0x22B JUMPI PUSH1 0x4 CALLDATALOAD DUP1 PUSH1 0xA0 SHR PUSH2 0x22B JUMPI PUSH1 0x40 MSTORE PUSH1 0x24 CALLDATALOAD DUP1 PUSH1 0x1 SHR PUSH2 0x22B JUMPI PUSH1 0x60 MSTORE PUSH1 0x40 MLOAD PUSH1 0x80 MSTORE PUSH1 0x60 CALLDATASIZE PUSH1 0xA0 CALLDATACOPY PUSH1 0x80 MLOAD PUSH4 0x92F1AC PUSH2 0x10 MSTORE PUSH1 0x60 PUSH2 0x10 PUSH1 0x4 PUSH2 0x11C DUP5 GAS STATICCALL PUSH2 0x07A JUMPI RETURNDATASIZE PUSH1 0x0 PUSH1 0x0 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST PUSH1 0x60 RETURNDATASIZE LT PUSH2 0x22B JUMPI PUSH2 0x10 MLOAD DUP1 PUSH1 0x70 SHR PUSH2 0x22B JUMPI PUSH2 0x180 MSTORE PUSH2 0x120 MLOAD DUP1 PUSH1 0x70 SHR PUSH2 0x22B JUMPI PUSH2 0x1A0 MSTORE PUSH2 0x140 MLOAD DUP1 PUSH1 0x20 SHR PUSH2 0x22B JUMPI PUSH2 0x1C0 MSTORE PUSH2 0x180 SWAP1 POP DUP1 MLOAD PUSH1 0xA0 MSTORE PUSH1 0x20 DUP2 ADD MLOAD PUSH1 0xC0 MSTORE PUSH1 0x40 DUP2 ADD MLOAD PUSH1 0xE0 MSTORE POP PUSH1 0x40 CALLDATASIZE PUSH2 0x10 CALLDATACOPY PUSH1 0x60 MLOAD PUSH2 0x0EE JUMPI PUSH1 0xC0 MLOAD PUSH2 0x10 MSTORE PUSH1 0xA0 MLOAD PUSH2 0x120 MSTORE PUSH2 0x0FD JUMP JUMPDEST PUSH1 0xA0 MLOAD PUSH2 0x10 MSTORE PUSH1 0xC0 MLOAD PUSH2 0x120 MSTORE JUMPDEST PUSH1 0x44 CALLDATALOAD PUSH2 0x3D1 DUP2 MUL DUP2 PUSH2 0x3D1 DUP3 DIV XOR PUSH2 0x22B JUMPI SWAP1 POP PUSH2 0x140 MSTORE PUSH2 0x140 MLOAD PUSH2 0x10 MLOAD DUP1 DUP3 MUL DUP2 ISZERO DUP4 DUP4 DUP4 DIV EQ OR ISZERO PUSH2 0x22B JUMPI SWAP1 POP SWAP1 POP PUSH2 0x120 MLOAD PUSH2 0x3E8 DUP2 MUL DUP2 PUSH2 0x3E8 DUP3 DIV XOR PUSH2 0x22B JUMPI SWAP1 POP PUSH2 0x140 MLOAD DUP1 DUP3 ADD DUP3 DUP2 LT PUSH2 0x22B JUMPI SWAP1 POP SWAP1 POP DUP1 ISZERO PUSH2 0x22B JUMPI DUP1 DUP3 DIV SWAP1 POP SWAP1 POP PUSH2 0x160 MSTORE PUSH2 0x120 MLOAD PUSH2 0x10 MLOAD DUP1 DUP3 MUL DUP2 ISZERO DUP4 DUP4 DUP4 DIV EQ OR ISZERO PUSH2 0x22B JUMPI SWAP1 POP SWAP1 POP PUSH2 0x180 MSTORE PUSH2 0x10 MLOAD PUSH2 0x140 MLOAD DUP1 DUP3 ADD DUP3 DUP2 LT PUSH2 0x22B JUMPI SWAP1 POP SWAP1 POP PUSH2 0x10 MSTORE PUSH2 0x160 MLOAD PUSH2 0x120 MLOAD GT PUSH2 0x1C6 JUMPI PUSH1 0x0 PUSH2 0x1A0 MSTORE PUSH1 0x20 PUSH2 0x1A0 PUSH2 0x221 JUMP PUSH2 0x1E1 JUMP JUMPDEST PUSH2 0x120 MLOAD PUSH2 0x160 MLOAD DUP1 DUP3 SUB DUP3 DUP2 GT PUSH2 0x22B JUMPI SWAP1 POP SWAP1 POP PUSH2 0x120 MSTORE JUMPDEST PUSH2 0x180 MLOAD PUSH2 0x120 MLOAD PUSH2 0x10 MLOAD DUP1 DUP3 MUL DUP2 ISZERO DUP4 DUP4 DUP4 DIV EQ OR ISZERO PUSH2 0x22B JUMPI SWAP1 POP SWAP1 POP GT ISZERO PUSH2 0x215 JUMPI PUSH1 0x20 PUSH2 0x160 PUSH2 0x221 JUMP PUSH2 0x221 JUMP JUMPDEST PUSH1 0x0 PUSH2 0x1A0 MSTORE PUSH1 0x20 PUSH2 0x1A0 JUMPDEST RETURN JUMPDEST POP JUMPDEST PUSH1 0x0 PUSH1 0x0 REVERT JUMPDEST PUSH1 0x0 DUP1 REVERT LOG1 PUSH6 0x767970657283 STOP SUB MOD STOP SIGNEXTEND",
+  "pcMap": {
+    "0": {
+      "offset": [
+        0,
+        1085
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x3"
+    },
+    "2": {
+      "op": "CALLDATASIZE"
+    },
+    "3": {
+      "op": "GT"
+    },
+    "4": {
+      "op": "PUSH2",
+      "value": "0x0C"
+    },
+    "7": {
+      "op": "JUMPI"
+    },
+    "8": {
+      "op": "PUSH2",
+      "value": "0x225"
+    },
+    "11": {
+      "op": "JUMP"
+    },
+    "12": {
+      "op": "JUMPDEST"
+    },
+    "13": {
+      "op": "PUSH1",
+      "value": "0x0"
+    },
+    "15": {
+      "op": "CALLDATALOAD"
+    },
+    "16": {
+      "op": "PUSH1",
+      "value": "0xE0"
+    },
+    "18": {
+      "op": "SHR"
+    },
+    "19": {
+      "op": "CALLVALUE"
+    },
+    "20": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "23": {
+      "op": "JUMPI"
+    },
+    "24": {
+      "op": "PUSH4",
+      "value": "0xA1E9AC50"
+    },
+    "29": {
+      "op": "DUP2"
+    },
+    "30": {
+      "op": "XOR"
+    },
+    "31": {
+      "op": "PUSH2",
+      "value": "0x223"
+    },
+    "34": {
+      "op": "JUMPI"
+    },
+    "35": {
+      "op": "PUSH1",
+      "value": "0x64"
+    },
+    "37": {
+      "op": "CALLDATASIZE"
+    },
+    "38": {
+      "op": "XOR"
+    },
+    "39": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "42": {
+      "op": "JUMPI"
+    },
+    "43": {
+      "op": "PUSH1",
+      "value": "0x4"
+    },
+    "45": {
+      "op": "CALLDATALOAD"
+    },
+    "46": {
+      "op": "DUP1"
+    },
+    "47": {
+      "op": "PUSH1",
+      "value": "0xA0"
+    },
+    "49": {
+      "op": "SHR"
+    },
+    "50": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "53": {
+      "op": "JUMPI"
+    },
+    "54": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        138,
+        152
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x40"
+    },
+    "56": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        138,
+        152
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "57": {
+      "op": "PUSH1",
+      "value": "0x24"
+    },
+    "59": {
+      "op": "CALLDATALOAD"
+    },
+    "60": {
+      "op": "DUP1"
+    },
+    "61": {
+      "op": "PUSH1",
+      "value": "0x1"
+    },
+    "63": {
+      "op": "SHR"
+    },
+    "64": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "67": {
+      "op": "JUMPI"
+    },
+    "68": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        154,
+        170
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x60"
+    },
+    "70": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        154,
+        170
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "71": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        227,
+        243
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 0,
+      "value": "0x40"
+    },
+    "73": {
+      "op": "MLOAD"
+    },
+    "74": {
+      "op": "PUSH1",
+      "value": "0x80"
+    },
+    "76": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        209,
+        243
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "77": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        253,
+        274
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 1,
+      "value": "0x60"
+    },
+    "79": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        253,
+        274
+      ],
+      "op": "CALLDATASIZE",
+      "path": "0"
+    },
+    "80": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        253,
+        274
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0xA0"
+    },
+    "82": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        253,
+        274
+      ],
+      "op": "CALLDATACOPY",
+      "path": "0"
+    },
+    "83": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        381,
+        385
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 2,
+      "value": "0x80"
+    },
+    "85": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        381,
+        399
+      ],
+      "op": "MLOAD",
+      "path": "0"
+    },
+    "86": {
+      "op": "PUSH4",
+      "value": "0x92F1AC"
+    },
+    "91": {
+      "op": "PUSH2",
+      "value": "0x10"
+    },
+    "94": {
+      "op": "MSTORE"
+    },
+    "95": {
+      "op": "PUSH1",
+      "value": "0x60"
+    },
+    "97": {
+      "op": "PUSH2",
+      "value": "0x10"
+    },
+    "100": {
+      "op": "PUSH1",
+      "value": "0x4"
+    },
+    "102": {
+      "op": "PUSH2",
+      "value": "0x11C"
+    },
+    "105": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        381,
+        399
+      ],
+      "op": "DUP5",
+      "path": "0"
+    },
+    "106": {
+      "op": "GAS"
+    },
+    "107": {
+      "op": "STATICCALL"
+    },
+    "108": {
+      "op": "PUSH2",
+      "value": "0x07A"
+    },
+    "111": {
+      "op": "JUMPI"
+    },
+    "112": {
+      "op": "RETURNDATASIZE"
+    },
+    "113": {
+      "op": "PUSH1",
+      "value": "0x0"
+    },
+    "115": {
+      "op": "PUSH1",
+      "value": "0x0"
+    },
+    "117": {
+      "op": "RETURNDATACOPY"
+    },
+    "118": {
+      "op": "RETURNDATASIZE"
+    },
+    "119": {
+      "op": "PUSH1",
+      "value": "0x0"
+    },
+    "121": {
+      "op": "REVERT"
+    },
+    "122": {
+      "op": "JUMPDEST"
+    },
+    "123": {
+      "op": "PUSH1",
+      "value": "0x60"
+    },
+    "125": {
+      "op": "RETURNDATASIZE"
+    },
+    "126": {
+      "op": "LT"
+    },
+    "127": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "130": {
+      "op": "JUMPI"
+    },
+    "131": {
+      "op": "PUSH2",
+      "value": "0x10"
+    },
+    "134": {
+      "op": "MLOAD"
+    },
+    "135": {
+      "op": "DUP1"
+    },
+    "136": {
+      "op": "PUSH1",
+      "value": "0x70"
+    },
+    "138": {
+      "op": "SHR"
+    },
+    "139": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "142": {
+      "op": "JUMPI"
+    },
+    "143": {
+      "op": "PUSH2",
+      "value": "0x180"
+    },
+    "146": {
+      "op": "MSTORE"
+    },
+    "147": {
+      "op": "PUSH2",
+      "value": "0x120"
+    },
+    "150": {
+      "op": "MLOAD"
+    },
+    "151": {
+      "op": "DUP1"
+    },
+    "152": {
+      "op": "PUSH1",
+      "value": "0x70"
+    },
+    "154": {
+      "op": "SHR"
+    },
+    "155": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "158": {
+      "op": "JUMPI"
+    },
+    "159": {
+      "op": "PUSH2",
+      "value": "0x1A0"
+    },
+    "162": {
+      "op": "MSTORE"
+    },
+    "163": {
+      "op": "PUSH2",
+      "value": "0x140"
+    },
+    "166": {
+      "op": "MLOAD"
+    },
+    "167": {
+      "op": "DUP1"
+    },
+    "168": {
+      "op": "PUSH1",
+      "value": "0x20"
+    },
+    "170": {
+      "op": "SHR"
+    },
+    "171": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "174": {
+      "op": "JUMPI"
+    },
+    "175": {
+      "op": "PUSH2",
+      "value": "0x1C0"
+    },
+    "178": {
+      "op": "MSTORE"
+    },
+    "179": {
+      "op": "PUSH2",
+      "value": "0x180"
+    },
+    "182": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        381,
+        399
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "183": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        381,
+        399
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "184": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        340,
+        399
+      ],
+      "op": "DUP1",
+      "path": "0"
+    },
+    "185": {
+      "op": "MLOAD"
+    },
+    "186": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        340,
+        348
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0xA0"
+    },
+    "188": {
+      "op": "MSTORE"
+    },
+    "189": {
+      "op": "PUSH1",
+      "value": "0x20"
+    },
+    "191": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        340,
+        399
+      ],
+      "op": "DUP2",
+      "path": "0"
+    },
+    "192": {
+      "op": "ADD"
+    },
+    "193": {
+      "op": "MLOAD"
+    },
+    "194": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        350,
+        358
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0xC0"
+    },
+    "196": {
+      "op": "MSTORE"
+    },
+    "197": {
+      "op": "PUSH1",
+      "value": "0x40"
+    },
+    "199": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        340,
+        399
+      ],
+      "op": "DUP2",
+      "path": "0"
+    },
+    "200": {
+      "op": "ADD"
+    },
+    "201": {
+      "op": "MLOAD"
+    },
+    "202": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        360,
+        378
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0xE0"
+    },
+    "204": {
+      "op": "MSTORE"
+    },
+    "205": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        340,
+        399
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "206": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        405,
+        428
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 3,
+      "value": "0x40"
+    },
+    "208": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        405,
+        428
+      ],
+      "op": "CALLDATASIZE",
+      "path": "0"
+    },
+    "209": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        405,
+        428
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x10"
+    },
+    "212": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        405,
+        428
+      ],
+      "op": "CALLDATACOPY",
+      "path": "0"
+    },
+    "213": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        464,
+        474
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x60"
+    },
+    "215": {
+      "op": "MLOAD"
+    },
+    "216": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        460,
+        672
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x0EE"
+    },
+    "219": {
+      "branch": 4,
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        460,
+        672
+      ],
+      "op": "JUMPI",
+      "path": "0"
+    },
+    "220": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        600,
+        626
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 5,
+      "value": "0xC0"
+    },
+    "222": {
+      "op": "MLOAD"
+    },
+    "223": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        587,
+        597
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x10"
+    },
+    "226": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        587,
+        626
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "227": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        646,
+        672
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 6,
+      "value": "0xA0"
+    },
+    "229": {
+      "op": "MLOAD"
+    },
+    "230": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        634,
+        643
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x120"
+    },
+    "233": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        634,
+        672
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "234": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        460,
+        672
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x0FD"
+    },
+    "237": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        460,
+        672
+      ],
+      "op": "JUMP",
+      "path": "0"
+    },
+    "238": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        460,
+        672
+      ],
+      "op": "JUMPDEST",
+      "path": "0"
+    },
+    "239": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        497,
+        523
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 7,
+      "value": "0xA0"
+    },
+    "241": {
+      "op": "MLOAD"
+    },
+    "242": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        484,
+        494
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x10"
+    },
+    "245": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        484,
+        523
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "246": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        543,
+        569
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 8,
+      "value": "0xC0"
+    },
+    "248": {
+      "op": "MLOAD"
+    },
+    "249": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        531,
+        540
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x120"
+    },
+    "252": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        531,
+        569
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "253": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        460,
+        672
+      ],
+      "op": "JUMPDEST",
+      "path": "0"
+    },
+    "254": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        704,
+        712
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 9,
+      "value": "0x44"
+    },
+    "256": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        704,
+        718
+      ],
+      "op": "CALLDATALOAD",
+      "path": "0"
+    },
+    "257": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        715,
+        718
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x3D1"
+    },
+    "260": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        704,
+        718
+      ],
+      "op": "DUP2",
+      "path": "0"
+    },
+    "261": {
+      "op": "MUL"
+    },
+    "262": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        704,
+        718
+      ],
+      "op": "DUP2",
+      "path": "0"
+    },
+    "263": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        715,
+        718
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x3D1"
+    },
+    "266": {
+      "op": "DUP3"
+    },
+    "267": {
+      "op": "DIV"
+    },
+    "268": {
+      "op": "XOR"
+    },
+    "269": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "272": {
+      "op": "JUMPI"
+    },
+    "273": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        704,
+        718
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "274": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        704,
+        718
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "275": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        677,
+        718
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x140"
+    },
+    "278": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        677,
+        718
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "279": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        745,
+        760
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "statement": 10,
+      "value": "0x140"
+    },
+    "282": {
+      "op": "MLOAD"
+    },
+    "283": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        763,
+        773
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x10"
+    },
+    "286": {
+      "op": "MLOAD"
+    },
+    "287": {
+      "op": "DUP1"
+    },
+    "288": {
+      "op": "DUP3"
+    },
+    "289": {
+      "op": "MUL"
+    },
+    "290": {
+      "op": "DUP2"
+    },
+    "291": {
+      "op": "ISZERO"
+    },
+    "292": {
+      "op": "DUP4"
+    },
+    "293": {
+      "op": "DUP4"
+    },
+    "294": {
+      "op": "DUP4"
+    },
+    "295": {
+      "op": "DIV"
+    },
+    "296": {
+      "op": "EQ"
+    },
+    "297": {
+      "op": "OR"
+    },
+    "298": {
+      "op": "ISZERO"
+    },
+    "299": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "302": {
+      "op": "JUMPI"
+    },
+    "303": {
+      "op": "SWAP1"
+    },
+    "304": {
+      "op": "POP"
+    },
+    "305": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        745,
+        773
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "306": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        745,
+        773
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "307": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        779,
+        788
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x120"
+    },
+    "310": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        779,
+        795
+      ],
+      "op": "MLOAD",
+      "path": "0"
+    },
+    "311": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        791,
+        795
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x3E8"
+    },
+    "314": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        779,
+        795
+      ],
+      "op": "DUP2",
+      "path": "0"
+    },
+    "315": {
+      "op": "MUL"
+    },
+    "316": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        779,
+        795
+      ],
+      "op": "DUP2",
+      "path": "0"
+    },
+    "317": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        791,
+        795
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x3E8"
+    },
+    "320": {
+      "op": "DUP3"
+    },
+    "321": {
+      "op": "DIV"
+    },
+    "322": {
+      "op": "XOR"
+    },
+    "323": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "326": {
+      "op": "JUMPI"
+    },
+    "327": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        779,
+        795
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "328": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        779,
+        795
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "329": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        799,
+        814
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x140"
+    },
+    "332": {
+      "op": "MLOAD"
+    },
+    "333": {
+      "op": "DUP1"
+    },
+    "334": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        778,
+        814
+      ],
+      "op": "DUP3",
+      "path": "0"
+    },
+    "335": {
+      "op": "ADD"
+    },
+    "336": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        778,
+        814
+      ],
+      "op": "DUP3",
+      "path": "0"
+    },
+    "337": {
+      "op": "DUP2"
+    },
+    "338": {
+      "op": "LT"
+    },
+    "339": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "342": {
+      "op": "JUMPI"
+    },
+    "343": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        778,
+        814
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "344": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        778,
+        814
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "345": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        778,
+        814
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "346": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        778,
+        814
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "347": {
+      "op": "DUP1"
+    },
+    "348": {
+      "op": "ISZERO"
+    },
+    "349": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "352": {
+      "op": "JUMPI"
+    },
+    "353": {
+      "op": "DUP1"
+    },
+    "354": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        744,
+        815
+      ],
+      "op": "DUP3",
+      "path": "0"
+    },
+    "355": {
+      "op": "DIV"
+    },
+    "356": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        744,
+        815
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "357": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        744,
+        815
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "358": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        744,
+        815
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "359": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        744,
+        815
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "360": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        723,
+        815
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x160"
+    },
+    "363": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        723,
+        815
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "364": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        836,
+        845
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "statement": 11,
+      "value": "0x120"
+    },
+    "367": {
+      "op": "MLOAD"
+    },
+    "368": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        848,
+        858
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x10"
+    },
+    "371": {
+      "op": "MLOAD"
+    },
+    "372": {
+      "op": "DUP1"
+    },
+    "373": {
+      "op": "DUP3"
+    },
+    "374": {
+      "op": "MUL"
+    },
+    "375": {
+      "op": "DUP2"
+    },
+    "376": {
+      "op": "ISZERO"
+    },
+    "377": {
+      "op": "DUP4"
+    },
+    "378": {
+      "op": "DUP4"
+    },
+    "379": {
+      "op": "DUP4"
+    },
+    "380": {
+      "op": "DIV"
+    },
+    "381": {
+      "op": "EQ"
+    },
+    "382": {
+      "op": "OR"
+    },
+    "383": {
+      "op": "ISZERO"
+    },
+    "384": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "387": {
+      "op": "JUMPI"
+    },
+    "388": {
+      "op": "SWAP1"
+    },
+    "389": {
+      "op": "POP"
+    },
+    "390": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        836,
+        858
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "391": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        836,
+        858
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "392": {
+      "op": "PUSH2",
+      "value": "0x180"
+    },
+    "395": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        820,
+        858
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "396": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        864,
+        874
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "statement": 12,
+      "value": "0x10"
+    },
+    "399": {
+      "op": "MLOAD"
+    },
+    "400": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        878,
+        893
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x140"
+    },
+    "403": {
+      "op": "MLOAD"
+    },
+    "404": {
+      "op": "DUP1"
+    },
+    "405": {
+      "op": "DUP3"
+    },
+    "406": {
+      "op": "ADD"
+    },
+    "407": {
+      "op": "DUP3"
+    },
+    "408": {
+      "op": "DUP2"
+    },
+    "409": {
+      "op": "LT"
+    },
+    "410": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "413": {
+      "op": "JUMPI"
+    },
+    "414": {
+      "op": "SWAP1"
+    },
+    "415": {
+      "op": "POP"
+    },
+    "416": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        864,
+        893
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "417": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        864,
+        893
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "418": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        864,
+        874
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x10"
+    },
+    "421": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        864,
+        893
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "422": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        919,
+        928
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x160"
+    },
+    "425": {
+      "op": "MLOAD"
+    },
+    "426": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        907,
+        916
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x120"
+    },
+    "429": {
+      "op": "MLOAD"
+    },
+    "430": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        907,
+        928
+      ],
+      "op": "GT",
+      "path": "0"
+    },
+    "431": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        903,
+        986
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x1C6"
+    },
+    "434": {
+      "branch": 13,
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        903,
+        986
+      ],
+      "op": "JUMPI",
+      "path": "0"
+    },
+    "435": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        985,
+        986
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 14,
+      "value": "0x0"
+    },
+    "437": {
+      "op": "PUSH2",
+      "value": "0x1A0"
+    },
+    "440": {
+      "op": "MSTORE"
+    },
+    "441": {
+      "op": "PUSH1",
+      "value": "0x20"
+    },
+    "443": {
+      "op": "PUSH2",
+      "value": "0x1A0"
+    },
+    "446": {
+      "op": "PUSH2",
+      "value": "0x221"
+    },
+    "449": {
+      "op": "JUMP"
+    },
+    "450": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        903,
+        986
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x1E1"
+    },
+    "453": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        903,
+        986
+      ],
+      "op": "JUMP",
+      "path": "0"
+    },
+    "454": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        903,
+        986
+      ],
+      "op": "JUMPDEST",
+      "path": "0"
+    },
+    "455": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        938,
+        947
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "statement": 15,
+      "value": "0x120"
+    },
+    "458": {
+      "op": "MLOAD"
+    },
+    "459": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        951,
+        960
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x160"
+    },
+    "462": {
+      "op": "MLOAD"
+    },
+    "463": {
+      "op": "DUP1"
+    },
+    "464": {
+      "op": "DUP3"
+    },
+    "465": {
+      "op": "SUB"
+    },
+    "466": {
+      "op": "DUP3"
+    },
+    "467": {
+      "op": "DUP2"
+    },
+    "468": {
+      "op": "GT"
+    },
+    "469": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "472": {
+      "op": "JUMPI"
+    },
+    "473": {
+      "op": "SWAP1"
+    },
+    "474": {
+      "op": "POP"
+    },
+    "475": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        938,
+        960
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "476": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        938,
+        960
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "477": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        938,
+        947
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x120"
+    },
+    "480": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        938,
+        960
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "481": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        903,
+        986
+      ],
+      "op": "JUMPDEST",
+      "path": "0"
+    },
+    "482": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        1029,
+        1033
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x180"
+    },
+    "485": {
+      "op": "MLOAD"
+    },
+    "486": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        1002,
+        1011
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x120"
+    },
+    "489": {
+      "op": "MLOAD"
+    },
+    "490": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        1014,
+        1024
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x10"
+    },
+    "493": {
+      "op": "MLOAD"
+    },
+    "494": {
+      "op": "DUP1"
+    },
+    "495": {
+      "op": "DUP3"
+    },
+    "496": {
+      "op": "MUL"
+    },
+    "497": {
+      "op": "DUP2"
+    },
+    "498": {
+      "op": "ISZERO"
+    },
+    "499": {
+      "op": "DUP4"
+    },
+    "500": {
+      "op": "DUP4"
+    },
+    "501": {
+      "op": "DUP4"
+    },
+    "502": {
+      "op": "DIV"
+    },
+    "503": {
+      "op": "EQ"
+    },
+    "504": {
+      "op": "OR"
+    },
+    "505": {
+      "op": "ISZERO"
+    },
+    "506": {
+      "op": "PUSH2",
+      "value": "0x22B"
+    },
+    "509": {
+      "op": "JUMPI"
+    },
+    "510": {
+      "op": "SWAP1"
+    },
+    "511": {
+      "op": "POP"
+    },
+    "512": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        1002,
+        1024
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "513": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        1002,
+        1024
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "514": {
+      "op": "GT"
+    },
+    "515": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        997,
+        1085
+      ],
+      "op": "ISZERO",
+      "path": "0"
+    },
+    "516": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        997,
+        1085
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "value": "0x215"
+    },
+    "519": {
+      "branch": 16,
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        997,
+        1085
+      ],
+      "op": "JUMPI",
+      "path": "0"
+    },
+    "520": {
+      "op": "PUSH1",
+      "value": "0x20"
+    },
+    "522": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        1076,
+        1085
+      ],
+      "op": "PUSH2",
+      "path": "0",
+      "statement": 17,
+      "value": "0x160"
+    },
+    "525": {
+      "op": "PUSH2",
+      "value": "0x221"
+    },
+    "528": {
+      "op": "JUMP"
+    },
+    "529": {
+      "op": "PUSH2",
+      "value": "0x221"
+    },
+    "532": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        997,
+        1085
+      ],
+      "op": "JUMP",
+      "path": "0"
+    },
+    "533": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        997,
+        1085
+      ],
+      "op": "JUMPDEST",
+      "path": "0"
+    },
+    "534": {
+      "fn": "univ2calc.calc_univ2_amountOut",
+      "offset": [
+        1050,
+        1051
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 18,
+      "value": "0x0"
+    },
+    "536": {
+      "op": "PUSH2",
+      "value": "0x1A0"
+    },
+    "539": {
+      "op": "MSTORE"
+    },
+    "540": {
+      "op": "PUSH1",
+      "value": "0x20"
+    },
+    "542": {
+      "op": "PUSH2",
+      "value": "0x1A0"
+    },
+    "545": {
+      "op": "JUMPDEST"
+    },
+    "546": {
+      "op": "RETURN"
+    },
+    "547": {
+      "op": "JUMPDEST"
+    },
+    "548": {
+      "op": "POP"
+    },
+    "549": {
+      "op": "JUMPDEST"
+    },
+    "550": {
+      "op": "PUSH1",
+      "value": "0x0"
+    },
+    "552": {
+      "op": "PUSH1",
+      "value": "0x0"
+    },
+    "554": {
+      "op": "REVERT"
+    },
+    "555": {
+      "op": "JUMPDEST"
+    },
+    "556": {
+      "op": "PUSH1",
+      "value": "0x0"
+    },
+    "558": {
+      "op": "DUP1"
+    },
+    "559": {
+      "op": "REVERT"
+    }
+  },
+  "sha1": "26afd4fe8cf60ea931beab87c5e583bef3a9f7e3",
+  "source": "# @version 0.3.6\ninterface IUni2Pool:\n    def getReserves() -> (uint112, uint112, uint32): view\n\n@external\n@view\ndef calc_univ2_amountOut(_pool: address, zeroForOne: bool, amountIn: uint256) -> (uint256):\n    pool: IUni2Pool = IUni2Pool(_pool)\n    \n    reserve0: uint112 = 0\n    reserve1: uint112 = 0\n    blockTimestamplast: uint32 = 0\n    reserve0, reserve1, blockTimestamplast = pool.getReserves()\n\n    reserveOut: uint256 = 0\n    reserveIn: uint256 = 0\n    if (zeroForOne):\n       reserveOut = convert(reserve0, uint256)\n       reserveIn = convert(reserve1, uint256)\n    else:\n       reserveOut = convert(reserve1, uint256)\n       reserveIn = convert(reserve0, uint256)\n    amountInWithFee: uint256 = amountIn * 977\n    amountOut: uint256 = (amountInWithFee * reserveOut) / ((reserveIn * 1000) + amountInWithFee)\n    kpre: uint256 = reserveIn * reserveOut\n\n    reserveOut += amountInWithFee\n    \n    if (reserveIn > amountOut):\n       reserveIn -= amountOut\n    else:\n       return 0\n    \n\n    if ((reserveIn * reserveOut) <= kpre):\n       return 0\n    else:\n       return amountOut\n\n\n",
+  "sourceMap": "",
+  "sourcePath": "contracts/univ2calc.vy",
+  "type": "contract"
+}

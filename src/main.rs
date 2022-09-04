@@ -101,23 +101,28 @@ impl UniV3Pool {
 	
     }
 
-    async fn amount_out(&self, token_in: &Address, amount_in: U256, swap_calc_contract: Arc<SwapCalc<Provider<Http>>>) -> U256 {
+    async fn amount_out(&self, token_in: &Address, amount_in: U256, swap_calc_contract: Arc<UniV3Calc<Provider<Http>>>) -> U256 {
 
 	let zero_for_one = self.zf1(token_in);
 	let spl = sqrt_price_limit(zero_for_one);
 	let amount: I256 = I256::try_from(amount_in).unwrap();
 	    
 	let r = swap_calc_contract.calc_v_3_swap(self.id, zero_for_one, amount, spl).call().await;
-	if let Ok(d) = r {
-	    if d.0.is_positive() {
-		return U256::try_from(d.1.abs()).unwrap();
-	    } else {
-		return U256::try_from(d.0.abs()).unwrap();
+	match r {
+	    Ok(d) => {
+		if d.0.is_positive() {
+		    return U256::try_from(d.1.abs()).unwrap();
+		} else {
+		    return U256::try_from(d.0.abs()).unwrap();
+		}
 	    }
-	} else {
-	    return ZERO;
+	    Err(e) => {
+		println!("{}", e);
+		return ZERO;
+	    }
 	}
     }
+
 
 }
 
@@ -184,16 +189,17 @@ impl UniV2Pool {
 	
     }
 
-    async fn amount_out(&self, token_in: &Address, amount: U256, swap_calc_contract: Arc<SwapCalc<Provider<Http>>>) -> U256 {
+    async fn amount_out(&self, token_in: &Address, amount: U256, swap_calc_contract: Arc<UniV2Calc<Provider<Http>>>) -> U256 {
 	let zero_for_one = self.zf1(token_in);
 	let r = swap_calc_contract.calc_univ_2_amount_out(self.id, zero_for_one, amount).call().await;
 	match r {
 	    Ok(d) => {return d},
-	    Err(d) => {return ZERO},
+	    Err(d) => {println!("{}", d); return ZERO},
 	}
 	
     }
 }
+    
 
 #[derive(Debug, Serialize, Deserialize, Clone)]    
 enum Pool {
@@ -251,13 +257,13 @@ impl Pool {
 	}
     }
 
-    async fn amount_out(&self, token_in: &Address, amount: U256, swap_calc_contract: Arc<SwapCalc<Provider<Http>>>) -> U256 {
+    async fn amount_out(&self, token_in: &Address, amount: U256, uni_v2_calc: Arc<UniV2Calc<Provider<Http>>>, uni_v3_calc: Arc<UniV3Calc<Provider<Http>>>) -> U256 {
 	match self {
 	    Pool::V2(pool) => {
-		return pool.amount_out(token_in, amount, swap_calc_contract).await;
+		return pool.amount_out(token_in, amount, uni_v2_calc).await;
 	    }
 	    Pool::V3(pool) => {
-		return pool.amount_out(token_in, amount, swap_calc_contract).await;
+		return pool.amount_out(token_in, amount, uni_v3_calc).await;
 	    }
 	}
     }
@@ -421,7 +427,7 @@ impl Graph<Pool, Address, usize> {
 	    let mut swap_path = SwapPath{steps: Vec::with_capacity(path.steps.capacity())};
 	    
 	    for step in path.steps {
-		let pool = self.pools.get(*step.pool).unwrap().addr();
+		let pool = self.pools.get(*step.pool).unwrap();
 		let token_in = self.itt.get(step.token_in).unwrap();
 		let token_out = self.itt.get(step.token_out).unwrap();
 		swap_path.steps.push(SwapStep{pool, token_in, token_out});
@@ -434,7 +440,7 @@ impl Graph<Pool, Address, usize> {
 }
 #[derive(Debug)]
 struct SwapStep<'a> {
-    pool: &'a Address,
+    pool: &'a Pool,
     token_in: &'a Address,
     token_out: &'a Address,
 }
@@ -526,7 +532,8 @@ fn load_pools() -> io::Result<Vec<Pool>> {
     return Ok(pools);    
 }
 
-abigen!(SwapCalc, "/Users/jasper/learningswaps/build/contracts/TickTest.json");
+abigen!(UniV3Calc, "/Users/jasper/Betelgeuse/build/contracts/UniV3Calc.json");
+abigen!(UniV2Calc, "/Users/jasper/Betelgeuse/build/contracts/univ2calc.json");
 
 const MAX_SQRT_PRICE: U256 = U256{0:[
     6743328256752651557,
@@ -544,7 +551,7 @@ const MIN_SQRT_PRICE: U256 = U256{0:[
 
 const ZERO: U256 = U256{0:[0,0,0,0]};
 
-const MAXLEN: usize = 3;
+const MAXLEN: usize = 2;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
@@ -564,12 +571,16 @@ async fn main() -> eyre::Result<()> {
     //let anvil = Anvil::new().fork("https://mainnet.infura.io/v3/cb7a603124c4411ba12877599e494814").spawn();
     //let wallet: LocalWallet = anvil.keys()[0].clone().into();
     //let provider = Provider::<Http>::try_from(anvil.endpoint())?;
-    // let provider = Provider::<Http>::try_from("http://127.0.0.1:8545")?;
-    // let addr = "0x9E4c14403d7d9A8A782044E86a93CAE09D7B2ac9".parse::<Address>().unwrap();
-    // let client = Arc::new(provider);
-    // let uni_calc = Arc::new(SwapCalc::new(addr, client));
+    let provider = Provider::<Http>::try_from("http://127.0.0.1:8545")?;
+    let client = Arc::new(provider);
+    
+    let uni_v3_calc_addr = "0xcCB53c9429d32594F404d01fbe9E65ED1DCda8D9".parse::<Address>().unwrap();
+    let uni_v2_calc_addr = "0x9E4c14403d7d9A8A782044E86a93CAE09D7B2ac9".parse::<Address>().unwrap();
+    
+    let uni_v2_calc = Arc::new(UniV2Calc::new(uni_v2_calc_addr, Arc::clone(&client)));
+    let uni_v3_calc = Arc::new(UniV3Calc::new(uni_v3_calc_addr, Arc::clone(&client)));
 
-    // let amount = U256::from_dec_str("100000").unwrap();
+    let amount = U256::from_dec_str("1000000000000000000").unwrap();
     let t = Instant::now();
     let graph = Graph::new(pools.clone());
     let took = t.elapsed();
@@ -577,8 +588,8 @@ async fn main() -> eyre::Result<()> {
 
 
     let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
-    let yfi = "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e".parse::<Address>().unwrap();
-    let dai = "0x6B175474E89094C44Da98b954EedeAC495271d0F".parse::<Address>().unwrap();
+    //let yfi = "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e".parse::<Address>().unwrap();
+    //let dai = "0x6B175474E89094C44Da98b954EedeAC495271d0F".parse::<Address>().unwrap();
     // for i in graph.clone().tokens.keys() {
     // 	for j in graph.clone().tokens.keys() {
     // 	    let t = Instant::now();
@@ -589,21 +600,62 @@ async fn main() -> eyre::Result<()> {
     // 	}
     // }
     let t = Instant::now();
-    let g = graph.find_path(&weth, &yfi).await.unwrap();
+    let g = graph.find_path(&weth, &weth).await.unwrap();
     let gt = t.elapsed();
 
     let t = Instant::now();
-    let p = graph.path_from_indices(g);
+    let allpaths = graph.path_from_indices(g);
     let pt = t.elapsed();
+    println!("{}", allpaths.len());
 
-    // for a in p {
-    // 	for step in a.steps {
-    // 	    println!("{:#?}", step);
-    // 	}
-    // 	println!("");
+
+    let token_in = pools[0].token0();
+    let v2 = Arc::clone(&uni_v2_calc);
+    let v3 = Arc::clone(&uni_v3_calc);
+    //println!("{:#?}", pools[i]);
+    match &pools[0] {
+	Pool::V3(pool) => {println!("{}", pool.amount_out(token_in, amount, v3).await)}
+	Pool::V2(pool) => {println!("{}", pool.amount_out(token_in, amount, v2).await)}
+    }
+    
+
+    
+    // for i in 0..pools.len() {
+    // 	let token_in = pools[i].token0();
+    // 	let v2 = Arc::clone(&uni_v2_calc);
+    // 	let v3 = Arc::clone(&uni_v3_calc);
+    // 	//println!("{:#?}", pools[i]);
+    // 	let r = pools[i].amount_out(token_in, amount, v2, v3).await;
+    // 	println!("{}", r);
     // }
 
-    println!("{} {}", gt.as_micros(), pt.as_micros());
+    // /* 
+    // for loops through token space. ie start_token == end_token
+    //  */
+    // for i in 0..allpaths.len() {
+    // //for (index, path) in allpaths.iter().enumerate() {
+    // 	let path = &allpaths[i];
+    // 	let mut amount_in = amount;
+    // 	for step in path.steps.iter() {
+	    
+    // 	    let amount_out = step.pool.amount_out(step.token_in, amount_in, Arc::clone(&uni_v2_calc), Arc::clone(&uni_v3_calc)).await;
+    // 	    if amount_out == ZERO {
+    // 		break;
+    // 	    }
+    // 	    amount_in = amount_out;
+	    
+    // 	}
+    // 	let prof = amount_in.saturating_sub(amount);
+    // 	println!("{}", i);
+    // 	if prof != ZERO {
+    // 	    println!("{:#?}", path.steps);
+    // 	    println!("{:?}", prof);
+    // 	    println!("");
+    // 	}
+	
+    // }
+
+    // println!("{} {}", gt.as_micros(), pt.as_micros());
 
 
     //println!("took {}ms to search finding {} paths", gt.as_millis(), g.len());
