@@ -118,7 +118,25 @@ impl UniV3Pool {
 	}
     }
 
-
+    pub async fn amount_in_for_out(&self, direction: bool, amount_out: U256, swap_calc_contract: Arc<UniV3Calc<Provider<Http>>>) -> U256 {
+	let spl = sqrt_price_limit(direction);
+	let amount: I256 = I256::try_from(amount_out).unwrap() * I256::minus_one();
+	
+	let r = swap_calc_contract.calc_v_3_swap(self.id, direction, amount, spl).call().await;
+	match r {
+	    Ok(d) => {
+		if d.0.is_positive() {
+		    return U256::try_from(d.0.abs()).unwrap();
+		} else {
+		    return U256::try_from(d.1.abs()).unwrap();
+		}
+	    }
+	    Err(e) => {
+		println!("{}", e);
+		return ZERO;
+	    }
+	}
+    }
 }
 
 

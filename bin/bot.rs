@@ -2,8 +2,9 @@
 use pathfinder::{
     pool::{Pool, load_pools},
     univ3pool::UniV3Calc,
-    univ2pool::UniV2Calc,
+    univ2pool::{UniV2Pool, UniV2Calc, FlashBotsUniV2Query},
     poolgraph::Graph,
+    calculator::Calculator,
 };
 use std::{
     sync::Arc,
@@ -19,7 +20,8 @@ use ethers::{
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
-    let pools = load_pools().unwrap();
+    //let pools = load_pools().unwrap();
+
     //let now = Instant::now();
     //let mm = market_map(&pools);
     //let mm_time = now.elapsed();
@@ -35,24 +37,40 @@ async fn main() -> eyre::Result<()> {
     //let anvil = Anvil::new().fork("https://mainnet.infura.io/v3/cb7a603124c4411ba12877599e494814").spawn();
     //let wallet: LocalWallet = anvil.keys()[0].clone().into();
     //let provider = Provider::<Http>::try_from(anvil.endpoint())?;
-    let provider = Provider::<Http>::try_from("http://127.0.0.1:8545")?;
+    let provider = Provider::<Http>::try_from("https://mainnet.infura.io/v3/cb7a603124c4411ba12877599e494814")?;
     let client = Arc::new(provider);
 
-    let uni_v2_calc_addr = "0x9E4c14403d7d9A8A782044E86a93CAE09D7B2ac9".parse::<Address>().unwrap();
-    let uni_v3_calc_addr = "0xcCB53c9429d32594F404d01fbe9E65ED1DCda8D9".parse::<Address>().unwrap();
+    let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
+    let fac_addr = "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac".parse::<Address>().unwrap();
+    let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
+
+    let r = UniV2Pool::from_flash(fac_addr, Arc::clone(&query)).await;
+    for pool in r {
+	println!("{:#?}", pool);
+    }
+    
+
+    
+
+    //let v2_address = "0x9E4c14403d7d9A8A782044E86a93CAE09D7B2ac9";
+    //let v3_address = "0xcCB53c9429d32594F404d01fbe9E65ED1DCda8D9";
+    
+    //let calc = Calculator::new(v2_address, v3_address, Arc::clone(&client));
+    //let uni_v2_calc_addr = "0x9E4c14403d7d9A8A782044E86a93CAE09D7B2ac9".parse::<Address>().unwrap();
+    //let uni_v3_calc_addr = "0xcCB53c9429d32594F404d01fbe9E65ED1DCda8D9".parse::<Address>().unwrap();
     
     
-    let uni_v2_calc = Arc::new(UniV2Calc::new(uni_v2_calc_addr, Arc::clone(&client)));
-    let uni_v3_calc = Arc::new(UniV3Calc::new(uni_v3_calc_addr, Arc::clone(&client)));
+    //let uni_v2_calc = Arc::new(UniV2Calc::new(uni_v2_calc_addr, Arc::clone(&client)));
+    //let uni_v3_calc = Arc::new(UniV3Calc::new(uni_v3_calc_addr, Arc::clone(&client)));
 
-    let amount = U256::from_dec_str("1000000000000000000").unwrap();
-    let t = Instant::now();
-    let graph = Graph::new(pools.clone());
-    let took = t.elapsed();
-    println!("took {}ms to build graph", took.as_millis());
+    // let amount = U256::from_dec_str("1000000000000000000").unwrap();
+    // let t = Instant::now();
+    // let graph = Graph::new(pools.clone());
+    // let took = t.elapsed();
+    // println!("took {}ms to build graph", took.as_millis());
 
 
-    let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
+    // let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
     //let yfi = "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e".parse::<Address>().unwrap();
     //let dai = "0x6B175474E89094C44Da98b954EedeAC495271d0F".parse::<Address>().unwrap();
     // for i in graph.clone().tokens.keys() {
@@ -64,24 +82,25 @@ async fn main() -> eyre::Result<()> {
     // 	    println!("took {}ms to search finding {} paths", gt.as_millis(), paths.len());
     // 	}
     // }
-    let t = Instant::now();
-    let g = graph.find_path(&weth, &weth).await.unwrap();
-    let gt = t.elapsed();
+    // let t = Instant::now();
+    // let g = graph.find_path(&weth, &weth).await.unwrap();
+    // let gt = t.elapsed();
 
-    let t = Instant::now();
-    let allpaths = graph.path_from_indices(g);
-    let pt = t.elapsed();
-    println!("{}", allpaths.len());
+    // let t = Instant::now();
+    // let allpaths = graph.path_from_indices(g);
+    // let pt = t.elapsed();
+    // println!("{}", allpaths.len());
 
 
-    let token_in = pools[0].token0();
-    let v2 = Arc::clone(&uni_v2_calc);
-    let v3 = Arc::clone(&uni_v3_calc);
-    //println!("{:#?}", pools[i]);
-    match &pools[0] {
-	Pool::V3(pool) => {println!("{}", pool.amount_out(token_in, amount, v3).await)}
-	Pool::V2(pool) => {println!("{}", pool.amount_out(token_in, amount, v2).await)}
-    }
+    // let token_in = pools[0].token0();
+
+    // let r = calc.amount_out_for_an_input(&pools[0], true, amount).await;
+    // println!("{}", r);
+    
+    // let amount = U256::from_dec_str("4091674361126346").unwrap();
+    // let r = calc.amount_in_for_an_output(&pools[0], true, amount).await;
+    // println!("{}", r);
+    
     
 
     
