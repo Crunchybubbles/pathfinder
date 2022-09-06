@@ -5,6 +5,7 @@ use pathfinder::{
     univ2pool::{UniV2Pool, UniV2Calc, FlashBotsUniV2Query},
     poolgraph::Graph,
     calculator::Calculator,
+    constants::ZERO,
 };
 use std::{
     sync::Arc,
@@ -41,14 +42,46 @@ async fn main() -> eyre::Result<()> {
     let client = Arc::new(provider);
 
     let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
-    let fac_addr = "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac".parse::<Address>().unwrap();
     let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
-
-    let r = UniV2Pool::from_flash(fac_addr, Arc::clone(&query)).await;
-    for pool in r {
-	println!("{:#?}", pool);
+    let pools: Vec<Pool>;
+    if let Ok(p) = load_pools(query).await {
+	pools = p;
+    } else {
+	panic!();
     }
+    let amount = U256::from_dec_str("1000000000").unwrap();
+    let now = Instant::now();
+    for pool in pools.iter() {
+	match pool {
+	    Pool::V2(p) => {
+		let t = p.get_amount_out(true, amount).await;
+		let f = p.get_amount_out(false, amount).await;
+//		println!("{} {}", t, f);
+		let tt = p.get_amount_in(true, t).await;
+		let ff = p.get_amount_in(false, f).await;
+		//		
+		if t != ZERO && f != ZERO && tt != ZERO && ff != ZERO {
+		    println!("{} {}", t, f);
+		    println!("{} {}", tt, ff);
+		    println!("");
+		} else {
+		    continue;
+		}
+		
+	    }
+	    Pool::V3(_) => {}
+	}
+
+    }
+    let took = now.elapsed();
+    println!("{}", took.as_millis());
+    // let fac_addrs = vec![shiba_fac];
     
+    // let r = UniV2Pool::flash_all_factorys(fac_addrs, Arc::clone(&query)).await;
+    // println!("{}", r.len());
+    // let sushi_fac = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f".parse::<Address>().unwrap();
+    // println!("{:#?}", sushi_fac.0);
+
 
     
 

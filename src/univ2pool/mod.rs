@@ -37,49 +37,58 @@ pub struct UniV2Pool {
 }
 
 impl UniV2Pool {
+    pub async fn flash_all_factorys(fac_addrs: Vec<Address>, query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) -> Vec<UniV2Pool> {
+	let mut pools: Vec<UniV2Pool> = vec![];
+	for factory in fac_addrs {
+	    let p = UniV2Pool::from_flash(factory, Arc::clone(&query_contract)).await;
+	    println!("number of pools {} for factory {}", p.len(), factory);
+	    for a in p {
+		pools.push(a);
+	    }
+	}
+	return pools;
+
+    }
+    
     pub async fn from_flash(fac_addr: Address, query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) -> Vec<UniV2Pool> {
 	let mut pools: Vec<UniV2Pool> = vec![];
-	let start = U256::from_dec_str("0").unwrap();
-	let stop = U256::from_dec_str("10").unwrap();
-	
+	let mut start = U256::from_dec_str("0").unwrap();
+	let mut stop = U256::from_dec_str("999").unwrap();
 
-	let r = query_contract.get_pairs_by_index_range(fac_addr, start, stop).call().await;
-
-	let mut addrs: Vec<Address> = vec![];
-	match r {
-	    Ok(p) => {
-		for i in 0..p.len() {
-		    let token0 = TokenV2 {id: p[i][0], reserves: ZERO};
-		    let token1 = TokenV2 {id: p[i][1], reserves: ZERO};
-		    pools.push(UniV2Pool {id: p[i][2], token0, token1});
-		    addrs.push(p[i][2]);
+	loop {
+	    let r = query_contract.get_pairs_by_index_range(fac_addr, start, stop).call().await;
+	    let mut addrs: Vec<Address> = vec![];
+	    match r {
+		Ok(p) => {
+		    for i in 0..p.len() {
+			let token0 = TokenV2 {id: p[i][0], reserves: ZERO};
+			let token1 = TokenV2 {id: p[i][1], reserves: ZERO};
+			pools.push(UniV2Pool {id: p[i][2], token0, token1});
+			addrs.push(p[i][2]);
+		    }  
 		}
-		
-	    }
-	    Err(e) => {
-		eprint!("{}", e);
-
-	    }
-	}
-	let r2 = query_contract.get_reserves_by_pairs(addrs).call().await;
-
-	match r2 {
-	    Ok(d) => {
-		for i in 0..d.len() {
-		    pools[i].token0.reserves = d[i][0];
-		    pools[i].token1.reserves = d[i][1];
+		Err(_) => {
+		    break;
 		}
 	    }
-	    Err(e) => {eprint!("{}", e)}
+	    let r2 = query_contract.get_reserves_by_pairs(addrs).call().await;   
+	    match r2 {
+		Ok(d) => {
+		    for i in 0..d.len() {
+			pools[i].token0.reserves = d[i][0];
+			pools[i].token1.reserves = d[i][1];
+		    }
+		}
+		Err(e) => {eprint!("{}", e)}
+	    }
+	    start = stop;
+	    stop = start + 999;
+	    println!("{}", pools.len());
+	    
 	}
-	
-	
-	    // start = stop;
-	    // stop = start + 999;
-	  
-
 	return pools;
     }
+    
     fn from_univ2pool(pool: _UniV2Pool) -> UniV2Pool {
 	let id: Address = pool.id.parse::<Address>().unwrap();
 	let token0_id: Address = pool.token0.id.parse::<Address>().unwrap();
@@ -118,6 +127,163 @@ impl UniV2Pool {
 	    Err(d) => {println!("{}", d); return ZERO},
 	}
 	
+    }
+
+    pub async fn get_amount_out(&self, zf1: bool, amount: U256) -> U256 {
+	let mut reserve_out: U256;
+	let mut reserve_in: U256;
+	
+	match zf1 {
+	    true => {
+		reserve_out = self.token0.reserves;
+		reserve_in = self.token1.reserves;
+	    }
+	    false => {
+		reserve_out = self.token1.reserves;
+		reserve_in = self.token0.reserves;
+	    }
+	}
+	
+	if self.token0.reserves > ZERO && self.token1.reserves > ZERO {
+	    let amount_in_with_fee: U256;
+	    if let Some(r) = amount.checked_mul(U256{0:[997,0,0,0]}) {
+		amount_in_with_fee = r;
+	    } else {
+		return ZERO;
+	    }
+	    let numerator: U256;
+	    if let Some(r) = amount_in_with_fee.checked_mul(reserve_out) {
+		numerator = r;
+	    } else {
+		return ZERO;
+	    }
+	    let denominator: U256;
+	    if let Some(r) = reserve_in.checked_mul(U256{0:[1000,0,0,0]}) {
+		if let Some(rr) = r.checked_add(amount_in_with_fee) {
+		    denominator = rr;
+		} else {
+		    return ZERO;
+		}
+	    } else {
+		return ZERO;
+	    }
+	    let amount_out: U256;
+	    if let Some(r) = numerator.checked_div(denominator) {
+		amount_out = r;
+	    } else {
+		return ZERO;
+	    }
+	    let kpre: U256;
+	    if let Some(r) = reserve_in.checked_mul(reserve_out) {
+		kpre = r;
+	    } else {
+		return ZERO;
+	    }
+	    if let Some(r) = reserve_out.checked_add(amount_in_with_fee) {
+		reserve_out = r;
+	    } else {
+		return ZERO;
+	    }
+	    
+	    if let Some(r) = reserve_in.checked_sub(amount_out) {
+		reserve_in = r;
+	    } else {
+		return ZERO;
+	    }
+
+	    if let Some(r) = reserve_in.checked_mul(reserve_out) {
+		if r <= kpre {
+		    return ZERO;
+		} else {
+		    return amount_out;
+		}
+	    } else {
+		return ZERO;
+	    }
+	} else {
+	    return ZERO;
+	}
+    }
+
+    pub async fn get_amount_in(&self, zf1: bool, amount: U256) -> U256 {
+	let reserve_out: U256;
+	let reserve_in: U256;
+	
+	match zf1 {
+	    true => {
+		reserve_out = self.token0.reserves;
+		reserve_in = self.token1.reserves;
+	    }
+	    false => {
+		reserve_out = self.token1.reserves;
+		reserve_in = self.token0.reserves;
+	    }
+	}
+	
+	if self.token0.reserves > ZERO && self.token1.reserves > ZERO {
+	    let numerator: U256;
+	    if let Some(r) = reserve_in.checked_mul(amount) {
+		if let Some(rr) = r.checked_mul(U256{0: [1000,0,0,0]}) {
+		    numerator = rr;
+		} else {
+		    return ZERO;
+		}
+	    } else {
+		return ZERO;
+	    }
+	    
+	    let denominator: U256;
+	    if let Some(r) = reserve_out.checked_sub(amount) {
+		if let Some(rr) = r.checked_mul(U256{0:[977,0,0,0]}) {
+		    denominator = rr;
+		} else {
+		    return ZERO;
+		}
+	    } else {
+		return ZERO;
+	    }
+	    
+	    let amount_in: U256;
+	    if let Some(r) = numerator.checked_div(denominator) {
+		amount_in = r + U256{0:[1,0,0,0]};
+		return amount_in;
+	    } else {
+		return ZERO;
+	    }
+
+	    // let kpre: U256;
+	    // if let Some(r) = reserve_in.checked_mul(reserve_out) {
+	    // 	kpre = r;
+	    // } else {
+	    // 	return ZERO;
+	    // }
+
+	    // if let Some(r) = reserve_out.checked_add(amount_in) {
+	    // 	reserve_out = r;
+	    // } else {
+	    // 	return ZERO;
+	    // }
+
+	    // if let Some(r) = reserve_in.checked_sub(amount) {
+	    // 	reserve_in = r;
+	    // } else {
+	    // 	return ZERO;
+	    // }
+
+	    // if let Some(r) = reserve_in.checked_mul(reserve_out) {
+	    // 	if r <= kpre {
+	    // 	    return ZERO;
+	    // 	} else {
+	    // 	    return amount_in;
+	    // 	}
+	    // } else {
+	    // 	return ZERO;
+	    // }
+	    
+
+	} else {
+	    return ZERO;
+	}	
     }
 
 }

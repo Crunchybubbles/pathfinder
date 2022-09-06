@@ -1,6 +1,8 @@
+#![allow(unused_imports)]
 use crate::{
     univ3pool::{UniV3Pool, UniV3Calc, uni3},
-    univ2pool::{UniV2Pool, UniV2Calc, uni2},
+    univ2pool::{UniV2Pool, UniV2Calc, FlashBotsUniV2Query},
+    constants::{SHIBA_FAC, SUSHI_FAC, UNIV2_FAC},
 };
 use ethers::{
     types::{Address, U256},
@@ -87,10 +89,16 @@ impl PartialEq for Pool {
 }
 
     
-pub fn load_pools() -> std::io::Result<Vec<Pool>> {
+pub async fn load_pools(query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) -> std::io::Result<Vec<Pool>> {
     let uni3 = uni3().unwrap();
-    let uni2pools = uni2("uni2data.txt").unwrap();
-    let sushi = uni2("sushipools.txt").unwrap();
+    //let uni2pools = uni2("uni2data.txt").unwrap();
+    //let sushi = uni2("sushipools.txt").unwrap();
+    //let sushi_fac = "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac".parse::<Address>().unwrap();
+    //let univ2_fac = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f".parse::<Address>().unwrap();
+    //let shiba_fac = "0x115934131916C8b277DD010Ee02de363c09d037c".parse::<Address>().unwrap();
+    
+
+    let v2 = UniV2Pool::flash_all_factorys(vec![SHIBA_FAC ,SUSHI_FAC, UNIV2_FAC], query_contract).await;
     let mut pools: Vec<Pool> = Vec::new();
     for pool in uni3 {
 	let p = Pool::V3(pool);
@@ -98,19 +106,13 @@ pub fn load_pools() -> std::io::Result<Vec<Pool>> {
 
     }
 
-    for pool in uni2pools {
+    for pool in v2 {
 	let p = Pool::V2(pool);
 	pools.push(p);
-
     
     }
 
-    for pool in sushi {
-	let p = Pool::V2(pool);
-	pools.push(p);
-
-    
-    }
+ 
     
     return Ok(pools);    
 }
