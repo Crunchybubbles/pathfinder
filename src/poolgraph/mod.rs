@@ -1,7 +1,8 @@
 #![allow(dead_code)]
 use ahash::AHashMap;
-use crate::{pool::Pool, constants::MAXLEN};
-use ethers::types::Address;
+use crate::{pool::Pool, constants::MAXLEN, univ2pool::FlashBotsUniV2Query};
+use ethers::{types::{Address, Transaction, Block}, providers::{Provider, Http}};
+use std::sync::Arc;
 
 
 #[derive(Clone)]
@@ -59,6 +60,11 @@ impl Graph<Pool, Address, usize> {
 	}
 	    
 	Graph{pools, tokens, ttp, itt, ptt}
+    }
+
+    pub async fn update_pool_data(&mut self, block: Block<Transaction>, query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) {
+	self.pools = Pool::check_and_update((*self.pools).to_vec(), block, query_contract).await;
+	
     }
 
     pub fn markets_of_token(&self, token: &Address) -> Option<Vec<Pool>> {

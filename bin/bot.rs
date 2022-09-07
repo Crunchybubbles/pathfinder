@@ -1,6 +1,6 @@
-#![allow(dead_code, unused_imports, unused_variables)]
+#![allow(dead_code, unused_imports, unused_variables, unreachable_code)]
 use pathfinder::{
-    pool::{Pool, load_pools},
+    pool::{Pool, load_pools, save_pools, load_pools_from_save},
     univ3pool::UniV3Calc,
     univ2pool::{UniV2Pool, UniV2Calc, FlashBotsUniV2Query},
     poolgraph::Graph,
@@ -13,9 +13,11 @@ use std::{
 	
 };
 use ethers::{
-    types::{Address, U256},
-    providers::{Provider, Http},
+    types::{Address, U256, Transaction, Block},
+    providers::{Provider, Http, Middleware, StreamExt},
 };
+
+use crossbeam::channel::unbounded;
 
 
 
@@ -43,38 +45,71 @@ async fn main() -> eyre::Result<()> {
 
     let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
     let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
-    let pools: Vec<Pool>;
-    if let Ok(p) = load_pools(query).await {
-	pools = p;
-    } else {
-	panic!();
-    }
-    let amount = U256::from_dec_str("1000000000").unwrap();
-    let now = Instant::now();
-    for pool in pools.iter() {
-	match pool {
-	    Pool::V2(p) => {
-		let t = p.get_amount_out(true, amount).await;
-		let f = p.get_amount_out(false, amount).await;
-//		println!("{} {}", t, f);
-		let tt = p.get_amount_in(true, t).await;
-		let ff = p.get_amount_in(false, f).await;
-		//		
-		if t != ZERO && f != ZERO && tt != ZERO && ff != ZERO {
-		    println!("{} {}", t, f);
-		    println!("{} {}", tt, ff);
-		    println!("");
-		} else {
-		    continue;
-		}
-		
-	    }
-	    Pool::V3(_) => {}
+    
+    let (tx, rx) = unbounded();
+    let c1 = Arc::clone(&client);
+    tokio::spawn(async move {
+	let mut stream = c1.watch_blocks().await.unwrap();
+	while let Some(b) = stream.next().await {
+	    let block = c1.get_block_with_txs(b).await.unwrap().unwrap();
+	    tx.send(block).unwrap();
+	    
 	}
+    });
+    
 
-    }
-    let took = now.elapsed();
-    println!("{}", took.as_millis());
+        
+    //let pools = load_pools(Arc::clone(&query)).await.unwrap();
+    //save_pools(&pools)?;
+    let pools = load_pools_from_save()?;
+    let mut graph = Graph::new(pools);
+    loop {    
+	let new_block = rx.recv().unwrap();
+	let now = Instant::now();
+	graph.update_pool_data(new_block, Arc::clone(&query)).await;
+	let took = now.elapsed();
+	println!("info updated took {}", took.as_millis());
+	}
+	
+	
+
+    
+    
+
+    
+
+//     let pools: Vec<Pool>;
+//     if let Ok(p) = load_pools(query).await {
+// 	pools = p;
+//     } else {
+// 	panic!();
+//     }
+//     let amount = U256::from_dec_str("1000000000").unwrap();
+//     let now = Instant::now();
+//     for pool in pools.iter() {
+// 	match pool {
+// 	    Pool::V2(p) => {
+// 		let t = p.get_amount_out(true, amount).await;
+// 		let f = p.get_amount_out(false, amount).await;
+// //		println!("{} {}", t, f);
+// 		let tt = p.get_amount_in(true, t).await;
+// 		let ff = p.get_amount_in(false, f).await;
+// 		//		
+// 		if t != ZERO && f != ZERO && tt != ZERO && ff != ZERO {
+// 		    println!("{} {}", t, f);
+// 		    println!("{} {}", tt, ff);
+// 		    println!("");
+// 		} else {
+// 		    continue;
+// 		}
+		
+// 	    }
+// 	    Pool::V3(_) => {}
+// 	}
+
+//     }
+//     let took = now.elapsed();
+//     println!("{}", took.as_millis());
     // let fac_addrs = vec![shiba_fac];
     
     // let r = UniV2Pool::flash_all_factorys(fac_addrs, Arc::clone(&query)).await;

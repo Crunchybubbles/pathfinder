@@ -5,10 +5,11 @@ use crate::{
     constants::{SHIBA_FAC, SUSHI_FAC, UNIV2_FAC},
 };
 use ethers::{
-    types::{Address, U256},
+    types::{Address, U256, Transaction, Block},
     providers::{Provider, Http},
 };
-use std::sync::Arc;
+use std::{sync::Arc, fs::File, io::BufReader};
+
 
 use serde::{Serialize, Deserialize};
 
@@ -79,6 +80,51 @@ impl Pool {
 	}
     }
 
+ 
+    pub async fn check_and_update(mut pools: Vec<Self>, block: Block<Transaction>, query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) -> Vec<Self> {
+	let mut pools_to_update: Vec<Address> = Vec::with_capacity(pools.len());
+	let mut pool_indices: Vec<usize> =  Vec::with_capacity(pools.len());
+	for (index, pool_addr) in pools.iter().enumerate() {
+	    for tx in block.transactions.iter() {
+		if let Some(r) = &tx.access_list {
+		    match pool_addr {
+			Pool::V2(p) => {
+			    for addr in r.0.iter() {
+				if p.id == addr.address {
+				    pools_to_update.push(addr.address);
+				    pool_indices.push(index);
+				} else {
+				    continue;
+				}
+			    }
+			}
+			Pool::V3(_) => {}
+		    }
+		}
+	    }	    
+	}
+	println!("updating {} pools", pools_to_update.len());
+	println!("{:#?}", pools_to_update);
+	let r = match query_contract.get_reserves_by_pairs(pools_to_update).call().await {
+	    Ok(t) => {t},
+	    Err(e) => {eprint!("{}", e); return pools}
+	};
+	for (i,reserves) in r.iter().enumerate() {
+	    let index = pool_indices[i];
+	    match &mut pools[index] {
+		Pool::V2(pool) => {
+		    pool.token0.reserves = reserves[0];
+		    pool.token1.reserves = reserves[1];
+		}
+		Pool::V3(_) => {}
+
+	    }
+	}
+	return pools;
+    }
+
+    
+
 }
 
 impl PartialEq for Pool {
@@ -91,13 +137,7 @@ impl PartialEq for Pool {
     
 pub async fn load_pools(query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) -> std::io::Result<Vec<Pool>> {
     let uni3 = uni3().unwrap();
-    //let uni2pools = uni2("uni2data.txt").unwrap();
-    //let sushi = uni2("sushipools.txt").unwrap();
-    //let sushi_fac = "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac".parse::<Address>().unwrap();
-    //let univ2_fac = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f".parse::<Address>().unwrap();
-    //let shiba_fac = "0x115934131916C8b277DD010Ee02de363c09d037c".parse::<Address>().unwrap();
-    
-
+ 
     let v2 = UniV2Pool::flash_all_factorys(vec![SHIBA_FAC ,SUSHI_FAC, UNIV2_FAC], query_contract).await;
     let mut pools: Vec<Pool> = Vec::new();
     for pool in uni3 {
@@ -117,3 +157,15 @@ pub async fn load_pools(query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>
     return Ok(pools);    
 }
 
+pub fn save_pools(pools: &Vec<Pool>) -> std::io::Result<()> {
+    serde_json::to_writer(File::create("pools.txt")?, pools)?;
+    println!("saved pool data!");
+    Ok(())
+}
+
+pub fn load_pools_from_save() -> std::io::Result<Vec<Pool>> {
+    let file = File::open("pools.txt")?;
+    let reader = BufReader::new(file);
+    let pools: Vec<Pool> = serde_json::from_reader(reader)?;
+    Ok(pools)
+}
