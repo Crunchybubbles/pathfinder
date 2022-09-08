@@ -10,6 +10,8 @@ use ethers::{
 };
 use std::{sync::Arc, fs::File, io::BufReader};
 
+use ahash::AHashMap;
+
 
 use serde::{Serialize, Deserialize};
 
@@ -81,28 +83,27 @@ impl Pool {
     }
 
  
-    pub async fn check_and_update(mut pools: Vec<Self>, block: Block<Transaction>, query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) -> Vec<Self> {
+    pub async fn check_and_update(mut pools: Vec<Self>, set: &AHashMap<Address, usize>, block: Block<Transaction>, query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) -> Vec<Self> {
 	let mut pools_to_update: Vec<Address> = Vec::with_capacity(pools.len());
 	let mut pool_indices: Vec<usize> =  Vec::with_capacity(pools.len());
-	for (index, pool_addr) in pools.iter().enumerate() {
-	    for tx in block.transactions.iter() {
-		if let Some(r) = &tx.access_list {
-		    match pool_addr {
-			Pool::V2(p) => {
-			    for addr in r.0.iter() {
-				if p.id == addr.address {
-				    pools_to_update.push(addr.address);
-				    pool_indices.push(index);
-				} else {
-				    continue;
-				}
+
+	for tx in block.transactions.iter() {
+	    if let Some(r) = &tx.access_list {
+		for item in r.0.iter() {
+		    if let Some(index) = set.get(&item.address) {
+			match &pools[*index] {
+			    Pool::V2(p) => {
+				pools_to_update.push(p.id);
+				pool_indices.push(*index);
 			    }
+			    Pool::V3(_) => {}
 			}
-			Pool::V3(_) => {}
-		    }
+
+		    } 
 		}
-	    }	    
-	}
+	    }
+	}	    
+	
 	println!("updating {} pools", pools_to_update.len());
 	println!("{:#?}", pools_to_update);
 	let r = match query_contract.get_reserves_by_pairs(pools_to_update).call().await {

@@ -3,7 +3,7 @@ use pathfinder::{
     pool::{Pool, load_pools, save_pools, load_pools_from_save},
     univ3pool::UniV3Calc,
     univ2pool::{UniV2Pool, UniV2Calc, FlashBotsUniV2Query},
-    poolgraph::Graph,
+    poolgraph::{Graph, SwapPath},
     calculator::Calculator,
     constants::ZERO,
 };
@@ -57,18 +57,57 @@ async fn main() -> eyre::Result<()> {
 	}
     });
     
-
+    let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
         
     //let pools = load_pools(Arc::clone(&query)).await.unwrap();
     //save_pools(&pools)?;
+    println!("loading pools!");
     let pools = load_pools_from_save()?;
+    println!("making graph");
     let mut graph = Graph::new(pools);
+    println!("awaiting new block");
     loop {    
 	let new_block = rx.recv().unwrap();
 	let now = Instant::now();
 	graph.update_pool_data(new_block, Arc::clone(&query)).await;
 	let took = now.elapsed();
 	println!("info updated took {}", took.as_millis());
+	let paths = graph.find_path(&weth, &weth).await.unwrap();
+	let sp: Vec<SwapPath> = graph.path_from_indices(paths);
+	println!("{}", sp.len());
+	let now = Instant::now();
+	for p in sp.iter() {
+	    
+	    let initital_amount_in = U256::from_dec_str("1000000").unwrap();
+	    let mut amount_in = initital_amount_in;
+	    let mut amount_out = ZERO;
+	    'dance: for step in p.steps.iter() {
+		let zf1: bool = step.token_in == step.pool.token0();
+		match step.pool {
+		    Pool::V2(pool) => {
+			amount_out = pool.get_amount_out(zf1, amount_in).await;
+			if amount_out == ZERO {
+			    break;
+			}
+			amount_in = amount_out;
+		    }
+		    Pool::V3(_) => {break 'dance}
+		    
+		}
+
+	    }
+	    let profit = amount_out.saturating_sub(initital_amount_in);
+	    if profit != ZERO {
+		println!("{:#?}", p);
+		println!("{}", profit);
+		println!("");
+	    }
+	    
+	}
+	let took = now.elapsed();
+	println!("took {} for all v2", took.as_micros());
+	println!("");
+	
 	}
 	
 	
@@ -138,7 +177,7 @@ async fn main() -> eyre::Result<()> {
     // println!("took {}ms to build graph", took.as_millis());
 
 
-    // let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
+    // 
     //let yfi = "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e".parse::<Address>().unwrap();
     //let dai = "0x6B175474E89094C44Da98b954EedeAC495271d0F".parse::<Address>().unwrap();
     // for i in graph.clone().tokens.keys() {

@@ -8,6 +8,7 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct Graph<P, A, I> {
     pools: Vec<P>,
+    set: AHashMap<A, I>,
     tokens: AHashMap<A, I>,
     ttp: AHashMap<I, Vec<I>>,
     itt: AHashMap<I, A>,
@@ -24,6 +25,7 @@ impl Graph<Pool, Address, usize> {
 	let mut ptt: Vec<[usize; 2]> = Vec::with_capacity(pools.len());
 	let mut token0: usize = 0;
 	let mut token1: usize = 0;
+	let mut set: AHashMap<Address, usize> = AHashMap::with_capacity(pools.len());
 	
 	for (pool_index, pool) in pools.clone().iter().enumerate() {
 	    if let Some(token0_index) = tokens.get(pool.token0()) {
@@ -55,15 +57,15 @@ impl Graph<Pool, Address, usize> {
 	    }
 	    
 	    ptt.push([token0, token1]);
-
+	    set.insert(*pool.addr(), pool_index);
 	    
 	}
 	    
-	Graph{pools, tokens, ttp, itt, ptt}
+	Graph{pools, set, tokens, ttp, itt, ptt}
     }
 
     pub async fn update_pool_data(&mut self, block: Block<Transaction>, query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) {
-	self.pools = Pool::check_and_update((*self.pools).to_vec(), block, query_contract).await;
+	self.pools = Pool::check_and_update((*self.pools).to_vec(), &self.set, block, query_contract).await;
 	
     }
 
@@ -172,14 +174,14 @@ impl Graph<Pool, Address, usize> {
     }
 }
 #[derive(Debug)]
-struct SwapStep<'a> {
-    pool: &'a Pool,
-    token_in: &'a Address,
-    token_out: &'a Address,
+pub struct SwapStep<'a> {
+    pub pool: &'a Pool,
+    pub token_in: &'a Address,
+    pub token_out: &'a Address,
 }
 #[derive(Debug)]
 pub struct SwapPath <'a> {
-    steps: Vec<SwapStep<'a>>
+    pub steps: Vec<SwapStep<'a>>
 }
 
 #[derive(Clone)]
