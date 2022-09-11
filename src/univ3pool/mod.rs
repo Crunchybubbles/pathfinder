@@ -5,7 +5,11 @@ use ethers::contract::abigen;
 use std::sync::Arc;
 use crate::constants::{ZERO, MIN_SQRT_PRICE, MAX_SQRT_PRICE};
 
+<<<<<<< HEAD
 abigen!(UniV3Calc, "UniV3Calc.json");
+=======
+abigen!(UniV3Calc, "/home/jasper/pathfinder/UniV3Calc.json");
+>>>>>>> new_main
 
 #[derive(Debug, Deserialize)]
 struct _Token {
