@@ -6,12 +6,8 @@ use crate::{
 };
 use ethers::{
     types::{Address, U256, Transaction, Block, U64},
-<<<<<<< HEAD
-    providers::{Provider, Http},
-=======
     providers::{Provider, Http, Middleware},
     
->>>>>>> new_main
 };
 use std::{sync::Arc, fs::File, io::BufReader};
 
@@ -175,10 +171,7 @@ pub fn load_pools_from_save() -> std::io::Result<Vec<Pool>> {
     let pools: Vec<Pool> = serde_json::from_reader(reader)?;
     Ok(pools)
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> new_main
 #[derive(Serialize, Deserialize)]
 pub struct PoolSave {
     pub pools: Vec<Pool>,

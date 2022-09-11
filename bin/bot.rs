@@ -1,10 +1,6 @@
 #![allow(dead_code, unused_imports, unused_variables, unreachable_code)]
 use pathfinder::{
-<<<<<<< HEAD
-    pool::{Pool, PoolSave,load_pools, save_pools, load_pools_from_save},
-=======
     pool::{Pool, load_pools, save_pools, load_pools_from_save, PoolSave},
->>>>>>> new_main
     univ3pool::UniV3Calc,
     univ2pool::{UniV2Pool, UniV2Calc, FlashBotsUniV2Query},
     poolgraph::{Graph, SwapPath},
@@ -160,11 +156,5 @@ async fn main() -> eyre::Result<()> {
     println!("{}", swap_path.len());
     let took = now.elapsed();
     println!("took {}us", took.as_micros());
-<<<<<<< HEAD
-
-
-=======
-    
->>>>>>> new_main
     Ok(())
 }

@@ -7,13 +7,10 @@ use std::sync::Arc;
 use ethers::providers::{Provider, Http};
 use crate::constants::ZERO;
 
-<<<<<<< HEAD
+
 abigen!(UniV2Calc, "univ2calc.json");
 abigen!(FlashBotsUniV2Query, "FlashBotsUniswapQuery.json");
-=======
-abigen!(UniV2Calc, "/home/jasper/pathfinder/univ2calc.json");
-abigen!(FlashBotsUniV2Query, "/home/jasper/pathfinder/FlashBotsUniswapQuery.json");
->>>>>>> new_main
+
 
 
 
