@@ -1,6 +1,6 @@
 #![allow(dead_code, unused_imports, unused_variables, unreachable_code)]
 use pathfinder::{
-    pool::{Pool, load_pools, save_pools, load_pools_from_save},
+    pool::{Pool, PoolSave,load_pools, save_pools, load_pools_from_save},
     univ3pool::UniV3Calc,
     univ2pool::{UniV2Pool, UniV2Calc, FlashBotsUniV2Query},
     poolgraph::{Graph, SwapPath},
@@ -153,7 +153,7 @@ async fn main() -> eyre::Result<()> {
     
     let now = Instant::now();
     let graph = Arc::new(graph);
-    let paths = find_path(Arc::clone(&graph), &weth, &weth).await.unwrap();
+    let paths = graph.find_path(&weth, &weth).await.unwrap();
     let swap_path = graph.path_from_indices(paths);
     println!("{}", swap_path.len());
     let took = now.elapsed();
