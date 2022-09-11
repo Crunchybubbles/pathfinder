@@ -7,8 +7,8 @@ use std::sync::Arc;
 use ethers::providers::{Provider, Http};
 use crate::constants::ZERO;
 
-abigen!(UniV2Calc, "/Users/jasper/Betelgeuse/build/contracts/univ2calc.json");
-abigen!(FlashBotsUniV2Query, "FlashBotsUniswapQuery.json");
+abigen!(UniV2Calc, "/home/jasper/pathfinder/univ2calc.json");
+abigen!(FlashBotsUniV2Query, "/home/jasper/pathfinder/FlashBotsUniswapQuery.json");
 
 
 

@@ -5,8 +5,9 @@ use crate::{
     constants::{SHIBA_FAC, SUSHI_FAC, UNIV2_FAC},
 };
 use ethers::{
-    types::{Address, U256, Transaction, Block},
-    providers::{Provider, Http},
+    types::{Address, U256, Transaction, Block, U64},
+    providers::{Provider, Http, Middleware},
+    
 };
 use std::{sync::Arc, fs::File, io::BufReader};
 
@@ -169,4 +170,25 @@ pub fn load_pools_from_save() -> std::io::Result<Vec<Pool>> {
     let reader = BufReader::new(file);
     let pools: Vec<Pool> = serde_json::from_reader(reader)?;
     Ok(pools)
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PoolSave {
+    pub pools: Vec<Pool>,
+    pub block: U64,
+}
+
+impl PoolSave {
+    pub async fn save(pools: Vec<Pool>, block: U64) -> std::io::Result<()> {
+	let info = PoolSave{pools, block};
+	serde_json::to_writer(File::create("pools.txt")?, &info)?;
+	Ok(())
+    }
+
+    pub fn load() -> std::io::Result<PoolSave> {
+	let file = File::open("pools.txt")?;
+	let reader = BufReader::new(file);
+	let pools: PoolSave = serde_json::from_reader(reader)?;
+	Ok(pools)
+    }
 }
