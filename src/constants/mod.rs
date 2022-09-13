@@ -16,7 +16,7 @@ pub const MIN_SQRT_PRICE: U256 = U256{0:[
 
 pub const ZERO: U256 = U256{0:[0,0,0,0]};
 
-pub const MAXLEN: usize = 3;
+pub const MAXLEN: usize = 2;
 
 pub const SUSHI_FAC: H160 = H160 {0: [
 192,
