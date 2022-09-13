@@ -242,11 +242,9 @@ struct PathStep {
     token_out: usize,
 }
 
-#[allow(unused_imports)]
-use rayon::prelude::*;
 
 pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address, finish: &Address) -> Option<Vec<Path>> {
-    //let (stack_push, stack_pop) = bounded(200000);
+
     let (stack_push, stack_pop) = unbounded();
     let (found_paths, path_receiver) = unbounded();
 
@@ -275,7 +273,7 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
     const THREAD_COUNT: usize = 1024;
     let mut handels = Vec::with_capacity(THREAD_COUNT);
 
-    #[allow(unused_assignments)]
+
     let mut count = 0;
     
     for pool_index in pool_indices.iter() {
