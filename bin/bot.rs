@@ -155,6 +155,6 @@ async fn main() -> eyre::Result<()> {
     let swap_path = graph.path_from_indices(paths);
     println!("{}", swap_path.len());
     let took = now.elapsed();
-    println!("took {}us", took.as_micros());
+    println!("took {}us", took.as_millis());
     Ok(())
 }
