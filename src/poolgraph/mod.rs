@@ -280,41 +280,25 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
 	    stack_push.send(Path{steps}).unwrap();
 	}
     }
-    //const THREAD_COUNT: usize = 1;
-    //let mut handels = Vec::with_capacity(THREAD_COUNT);
-//    for _ in 0..THREAD_COUNT {
-    let s_pop = stack_pop.clone();
-    let s_push = stack_push.clone();
-    let f_paths = found_paths.clone();
-    let g = Arc::clone(&graph);
-
-    let h1 = tokio::spawn(async move {search(g, s_pop, s_push, f_paths, target_index).await});
-
-    let s_pop = stack_pop.clone();
-    let s_push = stack_push.clone();
-    let f_paths = found_paths.clone();
-    let g = Arc::clone(&graph);
-
-    let h2 = tokio::spawn(async move {search(g, s_pop, s_push, f_paths, target_index).await});
-  
-    let s_pop = stack_pop.clone();
-    let s_push = stack_push.clone();
-    let f_paths = found_paths.clone();
-    let g = Arc::clone(&graph);
-
-    let h3 = tokio::spawn(async move {search(g, s_pop, s_push, f_paths, target_index).await});
     
-    let (_, _, _) = tokio::join!(h1,h2,h3);
+    const THREAD_COUNT: usize = 10;
+    let mut handels = Vec::with_capacity(THREAD_COUNT);
+    for _ in 0..THREAD_COUNT {
+	let s_pop = stack_pop.clone();
+	let s_push = stack_push.clone();
+	let f_paths = found_paths.clone();
+	let g = Arc::clone(&graph);
+	
+	let h = tokio::spawn(async move {search(g, s_pop, s_push, f_paths, target_index).await});
+	handels.push(h);
+    }
+
+    for h in handels {
+	let _ = tokio::join!(h);
+    }
 
 
-		
-//	handels.push(h);
-   // }
-    
-    // for h in handels {
-    // 	tokio::join!(h.unwrap());
-    // }
-    //println!("joined?");
+
     println!("{}", path_receiver.len());
     
     let mut fp: Vec<Path> = Vec::with_capacity(path_receiver.len());
