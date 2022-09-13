@@ -7,10 +7,6 @@ use std::sync::Arc;
 use ethers::providers::{Provider, Http};
 use crate::constants::ZERO;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> concur
 abigen!(UniV2Calc, "univ2calc.json");
 abigen!(FlashBotsUniV2Query, "FlashBotsUniswapQuery.json");
 

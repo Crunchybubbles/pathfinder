@@ -124,7 +124,6 @@ async fn main() -> eyre::Result<()> {
 // 		    }
 		    
 // 		}
-<<<<<<< HEAD
 
 // 	    }
 // 	    let profit = amount_out.saturating_sub(initital_amount_in);
@@ -142,7 +141,6 @@ async fn main() -> eyre::Result<()> {
 // 	println!("");
 
     //     }
-=======
 
 // 	    }
 // 	    let profit = amount_out.saturating_sub(initital_amount_in);
@@ -161,29 +159,13 @@ async fn main() -> eyre::Result<()> {
 
     //     }
     
-    
-    let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
->>>>>>> concur
-    
-    let pool_save = PoolSave::load().unwrap();
-    let pools = pool_save.pools;
-    let graph = Graph::new(pools);
-    
-<<<<<<< HEAD
+
     let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
     
     let pool_save = PoolSave::load().unwrap();
     let pools = pool_save.pools;
     let graph = Graph::new(pools);
     
-    let now = Instant::now();
-    let graph = Arc::new(graph);
-    let paths = graph.find_path(&weth, &weth).await.unwrap();
-    let swap_path = graph.path_from_indices(paths);
-    println!("{}", swap_path.len());
-    let took = now.elapsed();
-    println!("took {}us", took.as_millis());
-=======
     let now = Instant::now();
     let graph = Arc::new(graph);
     let paths = find_path(Arc::clone(&graph), &weth, &weth).await.unwrap();
@@ -192,6 +174,6 @@ async fn main() -> eyre::Result<()> {
     let took = now.elapsed();
     println!("took {}ms", took.as_millis());
     
->>>>>>> concur
+
     Ok(())
 }
