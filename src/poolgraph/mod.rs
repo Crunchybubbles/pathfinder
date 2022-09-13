@@ -334,7 +334,7 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
 
 async fn search<'a>(graph: Arc<Graph<Pool, Address, usize>>, stack_pop: Receiver<Path>, stack_push: Sender<Path>, found_paths: Sender<Path>, target_index: usize) {
     loop {
-	println!("{}", stack_pop.len());
+//	println!("{}", stack_pop.len());
 
 	if stack_pop.len() == 0 {
 	    break;
