@@ -281,7 +281,7 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
 	}
     }
     
-    const THREAD_COUNT: usize = 10;
+    const THREAD_COUNT: usize = 2;
     let mut handels = Vec::with_capacity(THREAD_COUNT);
     for _ in 0..THREAD_COUNT {
 	let s_pop = stack_pop.clone();
