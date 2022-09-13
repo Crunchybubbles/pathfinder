@@ -350,7 +350,7 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
 	let f_paths = found_paths.clone();
 	let g = Arc::clone(&graph);
 	
-	let h = tokio::spawn(async move {search(g, s_pop, s_push, f_paths, target_index).await});
+	let h = tokio::spawn(async move {search(g, s_pop, s_push, f_paths, target_index)});
 	handels.push(h);
     }
 
@@ -377,10 +377,10 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
 
 
 
-async fn search<'a>(graph: Arc<Graph<Pool, Address, usize>>, stack_pop: Receiver<Path>, stack_push: Sender<Path>, found_paths: Sender<Path>, target_index: usize) {
+fn search<'a>(graph: Arc<Graph<Pool, Address, usize>>, stack_pop: Receiver<Path>, stack_push: Sender<Path>, found_paths: Sender<Path>, target_index: usize) {
     println!("hello");
     loop {
-
+//	println!("hi");
 
 	if stack_pop.len() == 0 {
 	    break;
