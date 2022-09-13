@@ -342,7 +342,7 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
 	}
     }
     
-    const THREAD_COUNT: usize = 2;
+    const THREAD_COUNT: usize = 1024;
     let mut handels = Vec::with_capacity(THREAD_COUNT);
     for _ in 0..THREAD_COUNT {
 	let s_pop = stack_pop.clone();
@@ -360,7 +360,7 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
 
 
 
-    println!("{}", path_receiver.len());
+  //  println!("{}", path_receiver.len());
     
     let mut fp: Vec<Path> = Vec::with_capacity(path_receiver.len());
     loop {
@@ -378,19 +378,14 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
 
 
 fn search<'a>(graph: Arc<Graph<Pool, Address, usize>>, stack_pop: Receiver<Path>, stack_push: Sender<Path>, found_paths: Sender<Path>, target_index: usize) {
-    println!("hello");
+//    println!("hello");
     loop {
 //	println!("hi");
-
-	if stack_pop.len() == 0 {
-	    break;
-	}
 	
 	let path: Path;
-	if let Ok(p) = stack_pop.recv() {
-	    path = p;
-	} else {
-	    break;
+	match  stack_pop.try_recv() {
+	    Ok(p) => {path = p}
+	    Err(_) => {break}
 	}
 	let last = path.steps.last().unwrap();
 
@@ -419,5 +414,5 @@ fn search<'a>(graph: Arc<Graph<Pool, Address, usize>>, stack_pop: Receiver<Path>
 	    }
 	}
     }
-    println!("goodbye");
+//    println!("goodbye");
 }
