@@ -175,14 +175,5 @@ async fn main() -> eyre::Result<()> {
     println!("took {}ms", took.as_millis());
 
 
-    let now = Instant::now();
-    let graph = Arc::new(graph);
-    let paths = graph.find_path(&weth, &weth).await.unwrap();
-    let swap_path = graph.path_from_indices(paths);
-    println!("{}", swap_path.len());
-    let took = now.elapsed();
-    println!("took {}ms", took.as_millis());
-
-
     Ok(())
 }

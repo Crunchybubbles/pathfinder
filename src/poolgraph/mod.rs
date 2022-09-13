@@ -88,68 +88,6 @@ impl Graph<Pool, Address, usize> {
 
     }
 
-     pub async fn find_path(&self, start: &Address, finish: &Address) -> Option<Vec<Path>> {
-	let mut stack: Vec<Path> = Vec::with_capacity(100000);
-	let mut found_paths: Vec<Path> = Vec::with_capacity(100000);
-	if let Some(target_index) = self.tokens.get(finish) {
-	    if let Some(token_index) = self.tokens.get(start) {
-		if let Some(pool_indices) = self.ttp.get(token_index) {
-		    for pool_index in pool_indices.iter() {
-			let step = PathStep{pool: *pool_index, token_in: *token_index, token_out: *self.token_out(*pool_index, *token_index)};
-			if step.token_out == *target_index {
-			    found_paths.push(Path{steps: vec![step]});
-			} else {
-			    let mut steps: Vec<PathStep> = Vec::with_capacity(MAXLEN);
-			    steps.push(step);
-			    stack.push(Path{steps});
-			}
-		    }
-
-		} else {
-		    return None;
-		}
-	    } else {
-		return None;
-	    }
-	
-
-	    loop {
-		if let Some(path) = stack.pop() {
-		    let last = path.steps.last().unwrap();
-		    if let Some(pools) = self.ttp.get(&last.token_out) {
-			for pool in pools.iter() {
-			    if !path.contains(pool) {
-				let token_out = self.token_out(*pool, last.token_out);
-				if !path.used_token(token_out) {
-				    let mut p = path.clone();
-				    let step = PathStep{pool: *pool, token_in: last.token_out, token_out: *token_out};
-				    p.steps.push(step);
-				    if p.steps.last().unwrap().token_out == *target_index {
-					found_paths.push(p);
-				    } else {
-					if p.steps.len() < MAXLEN {
-					    stack.push(p);
-					}
-				    }
-				}
-				
-			    }
-			}
-		    }
-		    
-		} else {
-		    break;
-		}
-	    }
-	} else {
-	    return None;
-	}
-
-    
-	return Some(found_paths);
-    }
-
-
     fn token_out(&self, pool: usize, token_in: usize) -> &usize {
 	if self.ptt[pool][0] == token_in {
 	    return &self.ptt[pool][1];
@@ -304,10 +242,11 @@ struct PathStep {
     token_out: usize,
 }
 
-
-
+#[allow(unused_imports)]
+use rayon::prelude::*;
 
 pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address, finish: &Address) -> Option<Vec<Path>> {
+    //let (stack_push, stack_pop) = bounded(200000);
     let (stack_push, stack_pop) = unbounded();
     let (found_paths, path_receiver) = unbounded();
 
@@ -331,6 +270,14 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
     } else {
 	return None;
     }
+
+
+    const THREAD_COUNT: usize = 1024;
+    let mut handels = Vec::with_capacity(THREAD_COUNT);
+
+    #[allow(unused_assignments)]
+    let mut count = 0;
+    
     for pool_index in pool_indices.iter() {
 	let step = PathStep{pool: *pool_index, token_in: token_index, token_out: *graph.token_out(*pool_index, token_index)};
 	if step.token_out == target_index {
@@ -340,19 +287,29 @@ pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address,
 	    steps.push(step);
 	    stack_push.send(Path{steps}).unwrap();
 	}
+
+	if count < THREAD_COUNT {
+	    let s_pop = stack_pop.clone();
+	    let s_push = stack_push.clone();
+	    let f_paths = found_paths.clone();
+	    let g = Arc::clone(&graph);
+	    let h = tokio::spawn(async move {search(g, s_pop, s_push, f_paths, target_index)});
+	    handels.push(h);
+	    count += 1;
+	}
+
     }
-    
-    const THREAD_COUNT: usize = 1024;
-    let mut handels = Vec::with_capacity(THREAD_COUNT);
-    for _ in 0..THREAD_COUNT {
+
+    if count < THREAD_COUNT {
 	let s_pop = stack_pop.clone();
 	let s_push = stack_push.clone();
 	let f_paths = found_paths.clone();
 	let g = Arc::clone(&graph);
-	
 	let h = tokio::spawn(async move {search(g, s_pop, s_push, f_paths, target_index)});
 	handels.push(h);
+	count += 1;
     }
+	
 
     for h in handels {
 	let _ = tokio::join!(h);
