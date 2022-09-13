@@ -88,68 +88,6 @@ impl Graph<Pool, Address, usize> {
 
     }
 
-     pub async fn find_path(&self, start: &Address, finish: &Address) -> Option<Vec<Path>> {
-	let mut stack: Vec<Path> = Vec::with_capacity(100000);
-	let mut found_paths: Vec<Path> = Vec::with_capacity(100000);
-	if let Some(target_index) = self.tokens.get(finish) {
-	    if let Some(token_index) = self.tokens.get(start) {
-		if let Some(pool_indices) = self.ttp.get(token_index) {
-		    for pool_index in pool_indices.iter() {
-			let step = PathStep{pool: *pool_index, token_in: *token_index, token_out: *self.token_out(*pool_index, *token_index)};
-			if step.token_out == *target_index {
-			    found_paths.push(Path{steps: vec![step]});
-			} else {
-			    let mut steps: Vec<PathStep> = Vec::with_capacity(MAXLEN);
-			    steps.push(step);
-			    stack.push(Path{steps});
-			}
-		    }
-
-		} else {
-		    return None;
-		}
-	    } else {
-		return None;
-	    }
-	
-
-	    loop {
-		if let Some(path) = stack.pop() {
-		    let last = path.steps.last().unwrap();
-		    if let Some(pools) = self.ttp.get(&last.token_out) {
-			for pool in pools.iter() {
-			    if !path.contains(pool) {
-				let token_out = self.token_out(*pool, last.token_out);
-				if !path.used_token(token_out) {
-				    let mut p = path.clone();
-				    let step = PathStep{pool: *pool, token_in: last.token_out, token_out: *token_out};
-				    p.steps.push(step);
-				    if p.steps.last().unwrap().token_out == *target_index {
-					found_paths.push(p);
-				    } else {
-					if p.steps.len() < MAXLEN {
-					    stack.push(p);
-					}
-				    }
-				}
-				
-			    }
-			}
-		    }
-		    
-		} else {
-		    break;
-		}
-	    }
-	} else {
-	    return None;
-	}
-
-    
-	return Some(found_paths);
-    }
-
-
     fn token_out(&self, pool: usize, token_in: usize) -> &usize {
 	if self.ptt[pool][0] == token_in {
 	    return &self.ptt[pool][1];
