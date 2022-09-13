@@ -1,8 +1,9 @@
 #![allow(dead_code)]
 use ahash::AHashMap;
-use crate::{pool::Pool, constants::MAXLEN, univ2pool::FlashBotsUniV2Query};
-use ethers::{types::{Address, Transaction, Block}, providers::{Provider, Http}};
+use crate::{pool::Pool, constants::{MAXLEN, ZERO}, univ2pool::FlashBotsUniV2Query};
+use ethers::{providers::{Provider, Http}, types::{Address, Transaction, Block, U64, U256}};
 use std::sync::Arc;
+use crossbeam::channel::{unbounded, Receiver, Sender};
 
 
 #[derive(Clone)]
@@ -87,66 +88,6 @@ impl Graph<Pool, Address, usize> {
 
     }
 
-    pub async fn find_path(&self, start: &Address, finish: &Address) -> Option<Vec<Path>> {
-	let mut stack: Vec<Path> = Vec::with_capacity(100000);
-	let mut found_paths: Vec<Path> = Vec::with_capacity(100000);
-	if let Some(target_index) = self.tokens.get(finish) {
-	    if let Some(token_index) = self.tokens.get(start) {
-		if let Some(pool_indices) = self.ttp.get(token_index) {
-		    for pool_index in pool_indices.iter() {
-			let step = PathStep{pool: pool_index, token_in: token_index, token_out: self.token_out(*pool_index, *token_index)};
-			if step.token_out == target_index {
-			    found_paths.push(Path{steps: vec![step]});
-			} else {
-			    let mut steps: Vec<PathStep> = Vec::with_capacity(MAXLEN);
-			    steps.push(step);
-			    stack.push(Path{steps});
-			}
-		    }
-
-		} else {
-		    return None;
-		}
-	    } else {
-		return None;
-	    }
-	
-
-	    loop {
-		if let Some(path) = stack.pop() {
-		    let last = path.steps.last().unwrap();
-		    if let Some(pools) = self.ttp.get(last.token_out) {
-			for pool in pools.iter() {
-			    if !path.contains(pool) {
-				let token_out = self.token_out(*pool, *last.token_out);
-				if !path.used_token(token_out) {
-				    let mut p = path.clone();
-				    let step = PathStep{pool, token_in: last.token_out, token_out};
-				    p.steps.push(step);
-				    if p.steps.last().unwrap().token_out == target_index {
-					found_paths.push(p);
-				    } else {
-					if p.steps.len() < MAXLEN {
-					    stack.push(p);
-					}
-				    }
-				}
-				
-			    }
-			}
-		    }
-		    
-		} else {
-		    break;
-		}
-	    }
-	} else {
-	    return None;
-	}
-
-    
-	return Some(found_paths);
-    }
 
     fn token_out(&self, pool: usize, token_in: usize) -> &usize {
 	if self.ptt[pool][0] == token_in {
@@ -162,15 +103,67 @@ impl Graph<Pool, Address, usize> {
 	    let mut swap_path = SwapPath{steps: Vec::with_capacity(path.steps.capacity())};
 	    
 	    for step in path.steps {
-		let pool = self.pools.get(*step.pool).unwrap();
-		let token_in = self.itt.get(step.token_in).unwrap();
-		let token_out = self.itt.get(step.token_out).unwrap();
+		let pool = self.pools.get(step.pool).unwrap();
+		let token_in = self.itt.get(&step.token_in).unwrap();
+		let token_out = self.itt.get(&step.token_out).unwrap();
 		swap_path.steps.push(SwapStep{pool, token_in, token_out});
 	    }
 	    swap_paths.push(swap_path);
 	}
 	return swap_paths;
 
+    }
+    pub async fn full_update(&mut self, query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) {
+	let mut pools_to_update: Vec<Address> = Vec::with_capacity(self.pools.len());
+	let mut indices: Vec<usize> = Vec::with_capacity(self.pools.len());
+	for (i, p) in self.pools.iter().enumerate() {
+	    match p {
+		Pool::V2(pool) => {
+		    pools_to_update.push(pool.id);
+		    indices.push(i);
+		}
+		Pool::V3(_) => {}
+		
+	    }
+	}
+	
+	let batch_size = 1000;
+	
+	'dance: loop {
+	    println!("fetching reserves");
+	    let mut pool_buffer: Vec<Address> = Vec::with_capacity(batch_size);	    
+	    let mut index_buffer: Vec<usize> = Vec::with_capacity(batch_size);
+
+	    for _ in 0..batch_size {
+		if let Some(pool) = pools_to_update.pop() {
+		    let index = indices.pop().unwrap();
+		    pool_buffer.push(pool);
+		    index_buffer.push(index);
+		} else {
+		    break 'dance;
+		}
+	    }
+	    	    
+	    let reserves = query_contract.get_reserves_by_pairs(pool_buffer).call().await.unwrap();
+	    for i in 0..index_buffer.len() {
+		match &mut self.pools[i] {
+		    Pool::V2(p) => {
+			p.token0.reserves = reserves[i][0];
+			p.token1.reserves = reserves[i][1];
+			
+		    }
+		    Pool::V3(_) => {}
+		}
+	    }
+	    
+	}
+	
+    }
+
+
+    pub async fn save_pools(&self, b: U64) -> std::io::Result<()> {
+	crate::pool::PoolSave::save(self.pools.clone(), b).await?;
+	Ok(())
     }
 }
 #[derive(Debug)]
@@ -184,16 +177,45 @@ pub struct SwapPath <'a> {
     pub steps: Vec<SwapStep<'a>>
 }
 
-#[derive(Clone)]
-pub struct Path <'a> {
-    steps: Vec<PathStep<'a>>
+impl<'a> SwapPath <'a> {
+    pub async fn maximize_profit(&self) -> (U256, U256) {
+	let initital_amount_in = U256::from_dec_str("1000000").unwrap();
+	loop {
+	    let mut amount_in = initital_amount_in;
+	    let mut amount_out = ZERO;
+
+	    for step in self.steps.iter() {
+		let zf1: bool = step.token_in == step.pool.token0();
+		match step.pool {
+		    Pool::V2(pool) => {
+			amount_out = pool.get_amount_out(zf1, amount_in).await;
+			if amount_out == ZERO {
+			    return (ZERO, ZERO);
+			}
+			amount_in = amount_out;
+		    }
+		    Pool::V3(_) => {
+			amount_out = ZERO;
+			return (ZERO, ZERO);
+		    }
+		    
+		}
+		
+	    }
+	}
+    }
 }
 
-impl <'a> Path <'a> {
+#[derive(Clone)]
+pub struct Path {
+    steps: Vec<PathStep>
+}
+
+impl Path {
     fn contains(&self, pool: &usize) -> bool {
 	let mut r = false;
 	for step in self.steps.iter() {
-	    if step.pool == pool {
+	    if &step.pool == pool {
 		r = true;
 		break;
 	    }
@@ -204,7 +226,7 @@ impl <'a> Path <'a> {
     fn used_token(&self, token: &usize) -> bool {
 	let mut r = false;
 	for step in self.steps.iter() {
-	    if step.token_out == token {
+	    if &step.token_out == token {
 		r = true;
 		break;
 	    }
@@ -215,8 +237,124 @@ impl <'a> Path <'a> {
 }
 
 #[derive(Clone)]
-struct PathStep <'a> {
-    pool: &'a usize,
-    token_in: &'a usize,
-    token_out: &'a usize,
+struct PathStep {
+    pool: usize,
+    token_in: usize,
+    token_out: usize,
+}
+
+
+
+
+pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address, finish: &Address) -> Option<Vec<Path>> {
+    let (stack_push, stack_pop) = unbounded();
+    let (found_paths, path_receiver) = unbounded();
+
+    let target_index: usize;
+    if let Some(t) = graph.tokens.get(finish) {
+	target_index = *t;
+    } else {
+	return None;
+    }
+    
+    let token_index: usize;
+    if let Some(t) = graph.tokens.get(start) {
+	token_index = *t;
+    } else {
+	return None;
+    }
+
+    let pool_indices: Vec<usize>;
+    if let Some(p) = graph.ttp.get(&token_index) {
+	pool_indices = p.clone();
+    } else {
+	return None;
+    }
+    for pool_index in pool_indices.iter() {
+	let step = PathStep{pool: *pool_index, token_in: token_index, token_out: *graph.token_out(*pool_index, token_index)};
+	if step.token_out == target_index {
+	    found_paths.send(Path{steps: vec![step]}).unwrap();
+	} else {
+	    let mut steps: Vec<PathStep> = Vec::with_capacity(MAXLEN);
+	    steps.push(step);
+	    stack_push.send(Path{steps}).unwrap();
+	}
+    }
+    
+    const THREAD_COUNT: usize = 2;
+    let mut handels = Vec::with_capacity(THREAD_COUNT);
+    for _ in 0..THREAD_COUNT {
+	let s_pop = stack_pop.clone();
+	let s_push = stack_push.clone();
+	let f_paths = found_paths.clone();
+	let g = Arc::clone(&graph);
+	
+	let h = tokio::spawn(async move {search(g, s_pop, s_push, f_paths, target_index).await});
+	handels.push(h);
+    }
+
+    for h in handels {
+	let _ = tokio::join!(h);
+    }
+
+
+
+    println!("{}", path_receiver.len());
+    
+    let mut fp: Vec<Path> = Vec::with_capacity(path_receiver.len());
+    loop {
+	if path_receiver.len() == 0 {
+	    break;
+	} else {
+	    let p = path_receiver.recv().unwrap();
+	    fp.push(p);
+	}
+    }
+    //println!("{}", fp.len());
+    return Some(fp);
+}
+
+
+
+async fn search<'a>(graph: Arc<Graph<Pool, Address, usize>>, stack_pop: Receiver<Path>, stack_push: Sender<Path>, found_paths: Sender<Path>, target_index: usize) {
+    loop {
+//	println!("{}", stack_pop.len());
+
+	if stack_pop.len() == 0 {
+	    break;
+	}
+	
+	let path: Path;
+	if let Ok(p) = stack_pop.recv() {
+	    path = p;
+	} else {
+	    break;
+	}
+	let last = path.steps.last().unwrap();
+
+	let pools: &Vec<usize>;
+	if let Some(p) = graph.ttp.get(&last.token_out) {
+	    pools = p;
+	} else {
+	    break;
+	}
+	for pool in pools.iter() {
+	    if !path.contains(pool) {
+		let token_out = graph.token_out(*pool, last.token_out);
+		if !path.used_token(token_out) {
+		    let mut p = path.clone();
+		    let step = PathStep{pool: *pool, token_in: last.token_out, token_out: *token_out};
+		    p.steps.push(step);
+		    if p.steps.last().unwrap().token_out == target_index {
+			found_paths.send(p).unwrap();
+		    } else {
+			if p.steps.len() < MAXLEN {
+			    stack_push.send(p).unwrap();
+			}
+		    }
+		}
+		
+	    }
+	}
+    }
 }

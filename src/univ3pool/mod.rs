@@ -5,7 +5,10 @@ use ethers::contract::abigen;
 use std::sync::Arc;
 use crate::constants::{ZERO, MIN_SQRT_PRICE, MAX_SQRT_PRICE};
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> concur
 abigen!(UniV3Calc, "UniV3Calc.json");
 
 #[derive(Debug, Deserialize)]
