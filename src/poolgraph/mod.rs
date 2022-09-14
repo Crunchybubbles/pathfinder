@@ -165,26 +165,56 @@ impl Graph<Pool, Address, usize> {
 	crate::pool::PoolSave::save(self.pools.clone(), b).await?;
 	Ok(())
     }
-}
-#[derive(Debug)]
+} 
+#[derive(Debug, Clone)]
 pub struct SwapStep<'a> {
     pub pool: &'a Pool,
     pub token_in: &'a Address,
     pub token_out: &'a Address,
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SwapPath <'a> {
     pub steps: Vec<SwapStep<'a>>,
     pub good: bool
 
 }
 
-impl<'a> SwapPath <'a> {
+
+
+impl<'a> SwapPath <'a>{
+    #[allow(unused_assignments)]
+    pub async fn swap_along_path(&self, initial_amount_in: U256) -> U256 {
+	let mut amount_in: U256 = initial_amount_in;
+	let mut amount_out: U256 = ZERO;
+	for step in self.steps.iter() {
+	    let zf1: bool = step.token_in == step.pool.token0();
+	    match step.pool {
+		Pool::V2(pool) => {
+		    amount_out = pool.get_amount_out(zf1, amount_in).await;
+		    if amount_out == ZERO {
+			return ZERO;
+		    }
+		    amount_in = amount_out;
+		}
+		Pool::V3(_) => {
+		    amount_out = ZERO;
+		    return ZERO;
+		}
+	    }
+	}
+	return amount_out;
+    }
+    
+    #[allow(unused_assignments)]           //amount_in, amount_out
     pub async fn maximize_profit(&self) -> (U256, U256) {
-	let initital_amount_in = U256::from_dec_str("1000000").unwrap();
+	let initital_amount_in = U256::from_dec_str("10000000000000000").unwrap();
+	let mut amount_out_last: U256 = ZERO;
+	let mut amount_in_last: U256 = ZERO;
+	let tolerance: U256 = U256{0:[1000,0,0,0]};
+	let delta = U256::from_dec_str("1000000000000000").unwrap();
 	loop {
 	    let mut amount_in = initital_amount_in;
-	    let mut amount_out = ZERO;
+	    let mut amount_out: U256 = ZERO;
 
 	    for step in self.steps.iter() {
 		let zf1: bool = step.token_in == step.pool.token0();
@@ -204,6 +234,39 @@ impl<'a> SwapPath <'a> {
 		}
 		
 	    }
+	    
+
+	    if amount_out > amount_out_last {
+		let diff = amount_out.checked_sub(amount_out_last).unwrap();
+		if diff < tolerance {
+		    return (amount_in, amount_out);
+		}
+		amount_out_last = amount_out
+	    } else {
+		return (amount_in_last, amount_out_last);
+	    }
+	    
+	    amount_in_last = amount_in;
+	    amount_out_last = amount_out;
+	    amount_in = amount_in.checked_add(delta).unwrap();
+	    
+	}
+    }
+
+    pub async fn check_path(&mut self) {
+	for step in self.steps.iter() {
+	    let r = match step.pool {
+		Pool::V2(pool) => {
+		    pool.get_amount_out(true, U256{0:[1000000,0,0,0]}).await
+		}
+		Pool::V3(_) => {ZERO}
+	    };
+
+	    if r == ZERO {
+		self.good = false;
+		break;
+	    }
+	    
 	}
     }
 }
@@ -245,7 +308,7 @@ struct PathStep {
     token_out: usize,
 }
 
-
+#[allow(unused_assignments)]
 pub async fn find_path(graph: Arc<Graph<Pool, Address, usize>>, start: &Address, finish: &Address) -> Option<Vec<Path>> {
 
     let (stack_push, stack_pop) = unbounded();

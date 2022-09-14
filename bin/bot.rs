@@ -34,10 +34,10 @@ async fn main() -> eyre::Result<()> {
 //     let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
 
 //     println!("loading pools!");
-// //    let block_num = client.get_block_number().await?;
-// //    let pools = load_pools(Arc::clone(&query)).await.unwrap();
-// //    PoolSave::save(pools, block_num).await?;
-// //    panic!();
+//     let block_num = client.get_block_number().await?;
+//     let pools = load_pools(Arc::clone(&query)).await.unwrap();
+//     PoolSave::save(pools, block_num).await?;
+//     panic!();
 //     let pool_save: PoolSave = PoolSave::load()?;
 //     let pools = pool_save.pools;
 
@@ -54,7 +54,7 @@ async fn main() -> eyre::Result<()> {
     
   
 //     println!("making graph");
-//     let mut graph = Graph::new(pools);
+//     let mut graph = Arc::new(Graph::new(pools));
 
 //     match full_update {
 // 	true => {
@@ -99,7 +99,7 @@ async fn main() -> eyre::Result<()> {
 // 	graph.update_pool_data(new_block, Arc::clone(&query)).await;
 // 	let took = now.elapsed();
 // 	println!("info updated took {}ms", took.as_millis());
-// 	let paths = graph.find_path(&weth, &weth).await.unwrap();
+// 	let paths = find_path(Arc::clone(&graph),&weth, &weth).await.unwrap();
 // 	let sp: Vec<SwapPath> = graph.path_from_indices(paths);
 // 	println!("{}", sp.len());
 // 	let now = Instant::now();
@@ -140,25 +140,7 @@ async fn main() -> eyre::Result<()> {
 // 	println!("took {}us for all v2", took.as_micros());
 // 	println!("");
 
-    //     }
-
-// 	    }
-// 	    let profit = amount_out.saturating_sub(initital_amount_in);
-// 	    if profit != ZERO {
-// 		println!("{:#?}", p);
-// 		println!("{}", profit);
-// 		println!("");
-// 	    }
-
-	    
-	    
-// 	}
-// 	let took = now.elapsed();
-// 	println!("took {}us for all v2", took.as_micros());
-// 	println!("");
-
-    //     }
-    
+//     }
 
     let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
     
@@ -174,6 +156,21 @@ async fn main() -> eyre::Result<()> {
     let took = now.elapsed();
     println!("took {}ms", took.as_millis());
 
+    let amount_in = U256::from_dec_str("1000000000000000").unwrap();
+
+    let mut most = ZERO;
+    let mut best: &SwapPath = &swap_path[0]; 
+    
+    for path in swap_path.iter() {
+	let amount_out = path.swap_along_path(amount_in).await;
+	if amount_out > most {
+	    most = amount_out;
+	    best = path;
+	}   
+    }
+    println!("{}", amount_in);
+    println!("{}", most);
+    println!("{:#?}", best);
 
     Ok(())
 }

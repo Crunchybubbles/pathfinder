@@ -102,14 +102,15 @@ mod tests {
 	let pool_save = PoolSave::load().unwrap();
 	let pools = pool_save.pools;
 	let graph = Graph::new(pools);
-
+	
 	let now = Instant::now();
 	let graph = Arc::new(graph);
 	let paths = find_path(Arc::clone(&graph), &weth, &weth).await.unwrap();
 	let swap_path = graph.path_from_indices(paths);
 	println!("{}", swap_path.len());
 	let took = now.elapsed();
-	println!("took {}us", took.as_micros());
+	println!("took {}ms", took.as_millis());
+
 	assert_eq!(0,0);
     }
     
