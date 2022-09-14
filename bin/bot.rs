@@ -27,7 +27,7 @@ async fn main() -> eyre::Result<()> {
 //     let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
 //     let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
     
-//     let (tx, rx) = unbounded();
+//     //let (tx, rx) = unbounded();
 //     let c1 = Arc::clone(&client);
 // //    let tx1 = tx.clone();
 
@@ -37,7 +37,7 @@ async fn main() -> eyre::Result<()> {
 //     let block_num = client.get_block_number().await?;
 //     let pools = load_pools(Arc::clone(&query)).await.unwrap();
 //     PoolSave::save(pools, block_num).await?;
-//     panic!();
+
 //     let pool_save: PoolSave = PoolSave::load()?;
 //     let pools = pool_save.pools;
 
@@ -142,12 +142,51 @@ async fn main() -> eyre::Result<()> {
 
 //     }
 
+
+    let provider = Provider::<Http>::try_from("https://mainnet.infura.io/v3/cb7a603124c4411ba12877599e494814")?;
+    let client = Arc::new(provider);
+
+    let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
+    let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
+
+
     let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
+    let target = "0xc40d16476380e4037e6b1a2594caf6a6cc8da967".parse::<Address>().unwrap();
+
+    let target_eth = U256::from_dec_str("857438959604129380483")?;
+
+    // let r = query.get_reserves_by_pairs(vec![target]).call().await.unwrap();
+    // for a in r.iter() {
+    // 	for b in a.iter() {
+    // 	    println!("{}", b);
+    // 	}
+    // }
+    
     
     let pool_save = PoolSave::load().unwrap();
     let pools = pool_save.pools;
     let graph = Graph::new(pools);
+    // for pool in pools.iter() {
+    // 	match pool {
+    // 	    Pool::V2(p) => {
+    // 		if p.id == target || p.token1.reserves == target_eth || p.token0.reserves == target_eth{
+    // 		    println!("{:x}", p.id);
+    // 		    println!("{}", p.token0.reserves);
+    // 		    println!("{}", p.token1.reserves);
+    // 		    println!("");
+    // 		} else {
+    // 		    continue;
+    // 		}
+    // 	    }
+    // 	    Pool::V3(_) => {}
+    // 	}
+    // }
     
+    // let mut  graph = Graph::new(pools);
+    // graph.full_update(query).await;
+    // let pools = graph.pools.clone();
+    // PoolSave::save(pools, client.get_block_number().await.unwrap()).await.unwrap();
+
     let now = Instant::now();
     let graph = Arc::new(graph);
     let paths = find_path(Arc::clone(&graph), &weth, &weth).await.unwrap();
@@ -160,7 +199,7 @@ async fn main() -> eyre::Result<()> {
 
     let mut most = ZERO;
     let mut best: &SwapPath = &swap_path[0]; 
-    
+    let now = Instant::now();
     for path in swap_path.iter() {
 	let amount_out = path.swap_along_path(amount_in).await;
 	if amount_out > most {
@@ -168,9 +207,10 @@ async fn main() -> eyre::Result<()> {
 	    best = path;
 	}   
     }
+    let took = now.elapsed();
     println!("{}", amount_in);
     println!("{}", most);
     println!("{:#?}", best);
-
+    println!("took {}ms to find best", took.as_millis());
     Ok(())
 }

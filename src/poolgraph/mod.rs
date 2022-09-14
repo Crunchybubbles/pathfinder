@@ -8,7 +8,7 @@ use crossbeam::channel::{unbounded, Receiver, Sender};
 
 #[derive(Clone)]
 pub struct Graph<P, A, I> {
-    pools: Vec<P>,
+    pub pools: Vec<P>,
     set: AHashMap<A, I>,
     tokens: AHashMap<A, I>,
     ttp: AHashMap<I, Vec<I>>,
@@ -128,35 +128,69 @@ impl Graph<Pool, Address, usize> {
 	}
 	
 	let batch_size = 1000;
-	
-	'dance: loop {
-	    println!("fetching reserves");
-	    let mut pool_buffer: Vec<Address> = Vec::with_capacity(batch_size);	    
-	    let mut index_buffer: Vec<usize> = Vec::with_capacity(batch_size);
-
-	    for _ in 0..batch_size {
-		if let Some(pool) = pools_to_update.pop() {
-		    let index = indices.pop().unwrap();
-		    pool_buffer.push(pool);
-		    index_buffer.push(index);
-		} else {
-		    break 'dance;
-		}
-	    }
-	    	    
-	    let reserves = query_contract.get_reserves_by_pairs(pool_buffer).call().await.unwrap();
-	    for i in 0..index_buffer.len() {
-		match &mut self.pools[i] {
-		    Pool::V2(p) => {
-			p.token0.reserves = reserves[i][0];
-			p.token1.reserves = reserves[i][1];
-			
+//	let mut pool_buffer: Vec<Address> = Vec::with_capacity(batch_size);	    
+//	let mut index_buffer: Vec<usize> = Vec::with_capacity(batch_size);
+	let mut start: usize = 0;
+	let mut end: usize = 999;
+	let total = pools_to_update.len();
+	loop {
+	    println!("{} {}", start, end);
+	    let reserves = query_contract.get_reserves_by_pairs((pools_to_update[start..end]).to_vec()).call().await.unwrap();
+	    for (i, pool_index) in indices[start..end].iter().enumerate() {
+		match &mut self.pools[*pool_index] {
+		    Pool::V2(pool) => {
+			pool.token0.reserves = reserves[i][0];
+			pool.token1.reserves = reserves[i][1];
 		    }
 		    Pool::V3(_) => {}
 		}
 	    }
 	    
+	    start = end;
+	    
+	    if start == total {
+		break;
+	    }
+	    if end + batch_size < total {
+		
+		end += batch_size;
+	    } else {
+		end = total;
+	    }
+
+	   
 	}
+	    
+	    //	    println!("fetching reserves");
+	    
+	//     for _ in 0..batch_size {
+	// 	if let Some(pool) = pools_to_update.pop() {
+	// 	    let index = indices.pop().unwrap();
+	// 	    pool_buffer.push(pool);
+	// 	    index_buffer.push(index);
+	// 	} else {
+	// 	    break 'dance;
+	// 	}
+
+	//     }
+	    
+	//     let reserves = query_contract.get_reserves_by_pairs(pool_buffer.clone()).call().await.unwrap();
+	//     for i in 0..batch_size {
+	// 	assert_eq!(pool_buffer[i], *self.pools[index_buffer[i]].addr());
+	// 	match &mut self.pools[index_buffer[i]] {
+	// 	    Pool::V2(p) => {
+	// 		p.token0.reserves = reserves[i][0];
+	// 		p.token1.reserves = reserves[i][1];
+			
+	// 	    }
+	// 	    Pool::V3(_) => {}
+	// 	}
+	//     }
+
+	//     pool_buffer.clear();
+	//     index_buffer.clear();
+	    
+	// }
 	
     }
 
