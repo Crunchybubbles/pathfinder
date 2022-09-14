@@ -96,12 +96,12 @@ impl Graph<Pool, Address, usize> {
 	}
     }
 
-    pub fn path_from_indices(&self, paths: Vec<Path>) -> Vec<SwapPath> {
+    pub fn path_from_indices(&self, paths: &Vec<Path>) -> Vec<SwapPath> {
 	let mut swap_paths: Vec<SwapPath> = Vec::with_capacity(paths.capacity());
 	for path in paths {
 	    let mut swap_path = SwapPath{steps: Vec::with_capacity(path.steps.capacity()), good: true};
 	    
-	    for step in path.steps {
+	    for step in path.steps.iter() {
 		let pool = self.pools.get(step.pool).unwrap();
 		let token_in = self.itt.get(&step.token_in).unwrap();
 		let token_out = self.itt.get(&step.token_out).unwrap();
@@ -241,51 +241,94 @@ impl<'a> SwapPath <'a>{
     
     #[allow(unused_assignments)]           //amount_in, amount_out
     pub async fn maximize_profit(&self) -> (U256, U256) {
-	let initital_amount_in = U256::from_dec_str("10000000000000000").unwrap();
-	let mut amount_out_last: U256 = ZERO;
-	let mut amount_in_last: U256 = ZERO;
-	let tolerance: U256 = U256{0:[1000,0,0,0]};
-	let delta = U256::from_dec_str("1000000000000000").unwrap();
-	loop {
-	    let mut amount_in = initital_amount_in;
-	    let mut amount_out: U256 = ZERO;
 
-	    for step in self.steps.iter() {
-		let zf1: bool = step.token_in == step.pool.token0();
-		match step.pool {
-		    Pool::V2(pool) => {
-			amount_out = pool.get_amount_out(zf1, amount_in).await;
-			if amount_out == ZERO {
-			    return (ZERO, ZERO);
-			}
-			amount_in = amount_out;
-		    }
-		    Pool::V3(_) => {
-			amount_out = ZERO;
-			return (ZERO, ZERO);
-		    }
-		    
-		}
-		
-	    }
-	    
+	let ten_15 = U256::from_dec_str("1000000000000000").unwrap();
+	let ten_16 = U256::from_dec_str("10000000000000000").unwrap();
+	let ten_17 = U256::from_dec_str("100000000000000000").unwrap();
+	let ten_18 = U256::from_dec_str("1000000000000000000").unwrap();
+	let ten_19 = U256::from_dec_str("10000000000000000000").unwrap();
+	let ten_20 = U256::from_dec_str("100000000000000000000").unwrap();
+	let mut most = ZERO;
+	let initial_amounts = [ten_15, ten_16, ten_17, ten_18, ten_19, ten_20];
+	for (i, amount) in initial_amounts.iter().enumerate() {
+	    let amount_out = self.swap_along_path(*amount).await;
 
-	    if amount_out > amount_out_last {
-		let diff = amount_out.checked_sub(amount_out_last).unwrap();
-		if diff < tolerance {
-		    return (amount_in, amount_out);
-		}
-		amount_out_last = amount_out
-	    } else {
-		return (amount_in_last, amount_out_last);
+	    if amount_out == ZERO {
+		return (ZERO, ZERO);
+	    } else if &amount_out > &most {
+		most = amount_out;
+	    } else if &amount_out < &most {
+		return (initial_amounts[i - 1], most);
 	    }
-	    
-	    amount_in_last = amount_in;
-	    amount_out_last = amount_out;
-	    amount_in = amount_in.checked_add(delta).unwrap();
-	    
 	}
-    }
+	return (initial_amounts[5], most);
+    }	
+	// let mut amount_out_last: U256 = ZERO;
+	// let mut amount_in_last: U256 = ZERO;
+	// let tolerance: U256 = U256{0:[1000,0,0,0]};
+	// let mut delta = U256::from_dec_str("1000000000000000").unwrap();
+
+	// let mut amount_in = initital_amount_in;
+	// loop {
+	// let amount_out = self.swap_along_path(amount_in).await;
+
+	// if amount_out > amount_out_last {
+	//     let diff = amount_out.checked_sub(amount_out_last).unwrap();
+	//     if diff < tolerance {
+	// 	return (amount_in, amount_out);
+	//     } else {
+	// 	amount_in_last = amount_in;
+	// 	amount_in = amount_in.checked_add(delta).unwrap();
+	//     }
+	//     amount_out_last = amount_out;
+	// } else {
+	//     amount_in = amount_in_last;
+	//     match delta.checked_div(U256{0:[2,0,0,0]}) {
+	// 	Some(r) => {delta = r}
+	// 	None => {return (ZERO, ZERO);}
+	//     }
+	// }
+	// }
+	// loop {
+
+	//     let mut amount_out: U256 = ZERO;
+
+	//     for step in self.steps.iter() {
+	// 	let zf1: bool = step.token_in == step.pool.token0();
+	// 	match step.pool {
+	// 	    Pool::V2(pool) => {
+	// 		amount_out = pool.get_amount_out(zf1, amount_in).await;
+	// 		if amount_out == ZERO {
+	// 		    return (ZERO, ZERO);
+	// 		}
+	// 		amount_in = amount_out;
+	// 	    }
+	// 	    Pool::V3(_) => {
+	// 		amount_out = ZERO;
+	// 		return (ZERO, ZERO);
+	// 	    }
+		    
+	// 	}
+		
+	//     }
+	    
+
+	//     if amount_out > amount_out_last {
+	// 	let diff = amount_out.checked_sub(amount_out_last).unwrap();
+	// 	if diff < tolerance {
+	// 	    return (amount_in, amount_out);
+	// 	}
+	// 	amount_out_last = amount_out
+	//     } else {
+	// 	return (amount_in_last, amount_out_last);
+	//     }
+	    
+	//     amount_in_last = amount_in;
+	//     amount_out_last = amount_out;
+	//     amount_in = amount_in.checked_add(delta).unwrap();
+	    
+	// } 
+    //}
 
     pub async fn check_path(&mut self) {
 	for step in self.steps.iter() {

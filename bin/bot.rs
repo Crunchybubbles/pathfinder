@@ -21,196 +21,150 @@ use crossbeam::channel::unbounded;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
-//     let provider = Provider::<Http>::try_from("https://mainnet.infura.io/v3/cb7a603124c4411ba12877599e494814")?;
-//     let client = Arc::new(provider);
-
-//     let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
-//     let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
-    
-//     //let (tx, rx) = unbounded();
-//     let c1 = Arc::clone(&client);
-// //    let tx1 = tx.clone();
-
-//     let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
-
-//     println!("loading pools!");
-//     let block_num = client.get_block_number().await?;
-//     let pools = load_pools(Arc::clone(&query)).await.unwrap();
-//     PoolSave::save(pools, block_num).await?;
-
-//     let pool_save: PoolSave = PoolSave::load()?;
-//     let pools = pool_save.pools;
-
-//     let mut my_block_number = pool_save.block;
-//     let blocks_behind = client.get_block_number().await? - my_block_number;
-
-//     let full_update: bool = blocks_behind > U64{0:[100]};
-
-//     // if re_save {
-
-//     // } else {
-
-//     // }
-    
-  
-//     println!("making graph");
-//     let mut graph = Arc::new(Graph::new(pools));
-
-//     match full_update {
-// 	true => {
-// 	    println!("full update!");
-// 	    graph.full_update(Arc::clone(&query)).await;
-// 	    println!("saving pools");
-// 	    graph.save_pools(client.get_block_number().await.unwrap()).await.unwrap();
-// 	}
-// 	false => {
-// 	    println!("not full update!");
-// 	    loop {
-
-// 		if my_block_number != client.get_block_number().await? {
-// 		    my_block_number = my_block_number.overflowing_add(U64::one()).0;	    
-// 		    let b = client.get_block_with_txs(my_block_number).await.unwrap().unwrap();
-// 		    graph.update_pool_data(b, Arc::clone(&query)).await;
-// 		} else {
-// 		    graph.save_pools(my_block_number).await?;
-// 		    break;
-// 		}
-// 	    }
-	    
-// 	}
-	
-//     }
-    
-//     tokio::spawn(async move {
-// 	let mut stream = c1.watch_blocks().await.unwrap();
-// 	while let Some(b) = stream.next().await {
-// 	    let block = c1.get_block_with_txs(b).await.unwrap().unwrap();
-// 	    tx.send(block).unwrap();
-	    
-// 	}
-//     });
- 
-
-    
-//     loop {    
-// 	println!("awaiting new block");
-// 	let new_block = rx.recv().unwrap();
-// 	let now = Instant::now();
-// 	graph.update_pool_data(new_block, Arc::clone(&query)).await;
-// 	let took = now.elapsed();
-// 	println!("info updated took {}ms", took.as_millis());
-// 	let paths = find_path(Arc::clone(&graph),&weth, &weth).await.unwrap();
-// 	let sp: Vec<SwapPath> = graph.path_from_indices(paths);
-// 	println!("{}", sp.len());
-// 	let now = Instant::now();
-// 	for p in sp.iter() {
-	    
-// 	    let initital_amount_in = U256::from_dec_str("1000000").unwrap();
-// 	    let mut amount_in = initital_amount_in;
-// 	    let mut amount_out = ZERO;
-// 	    for step in p.steps.iter() {
-// 		let zf1: bool = step.token_in == step.pool.token0();
-// 		match step.pool {
-// 		    Pool::V2(pool) => {
-// 			amount_out = pool.get_amount_out(zf1, amount_in).await;
-// 			if amount_out == ZERO {
-// 			    break;
-// 			}
-// 			amount_in = amount_out;
-// 		    }
-// 		    Pool::V3(_) => {
-// 			amount_out = ZERO;
-// 			break;
-// 		    }
-		    
-// 		}
-
-// 	    }
-// 	    let profit = amount_out.saturating_sub(initital_amount_in);
-// 	    if profit != ZERO {
-// 		println!("{:#?}", p);
-// 		println!("{}", profit);
-// 		println!("");
-// 	    }
-
-	    
-	    
-// 	}
-// 	let took = now.elapsed();
-// 	println!("took {}us for all v2", took.as_micros());
-// 	println!("");
-
-//     }
-
-
     let provider = Provider::<Http>::try_from("https://mainnet.infura.io/v3/cb7a603124c4411ba12877599e494814")?;
     let client = Arc::new(provider);
 
     let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
     let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
-
+    
+    let (tx, rx) = unbounded();
+    let c1 = Arc::clone(&client);
+//    let tx1 = tx.clone();
 
     let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
-    let target = "0xc40d16476380e4037e6b1a2594caf6a6cc8da967".parse::<Address>().unwrap();
 
-    let target_eth = U256::from_dec_str("857438959604129380483")?;
-
-    // let r = query.get_reserves_by_pairs(vec![target]).call().await.unwrap();
-    // for a in r.iter() {
-    // 	for b in a.iter() {
-    // 	    println!("{}", b);
-    // 	}
-    // }
+    // println!("loading pools!");
+    // let block_num = client.get_block_number().await?;
+    // let pools = load_pools(Arc::clone(&query)).await.unwrap();
+    // PoolSave::save(pools, block_num).await?;
     
-    
-    let pool_save = PoolSave::load().unwrap();
+    let pool_save: PoolSave = PoolSave::load()?;
     let pools = pool_save.pools;
-    let graph = Graph::new(pools);
-    // for pool in pools.iter() {
-    // 	match pool {
-    // 	    Pool::V2(p) => {
-    // 		if p.id == target || p.token1.reserves == target_eth || p.token0.reserves == target_eth{
-    // 		    println!("{:x}", p.id);
-    // 		    println!("{}", p.token0.reserves);
-    // 		    println!("{}", p.token1.reserves);
-    // 		    println!("");
-    // 		} else {
-    // 		    continue;
-    // 		}
-    // 	    }
-    // 	    Pool::V3(_) => {}
+
+    let mut my_block_number = pool_save.block;
+    let blocks_behind = client.get_block_number().await? - my_block_number;
+
+    let full_update: bool = blocks_behind > U64{0:[100]};
+    
+  
+    println!("making graph");
+    let mut graph = Graph::new(pools);
+
+    match full_update {
+	true => {
+	    println!("full update!");
+	    graph.full_update(Arc::clone(&query)).await;
+	    println!("saving pools");
+	    graph.save_pools(client.get_block_number().await.unwrap()).await.unwrap();
+	}
+	false => {
+	    println!("not full update!");
+	    loop {
+
+		if my_block_number != client.get_block_number().await? {
+		    my_block_number = my_block_number.overflowing_add(U64::one()).0;	    
+		    let b = client.get_block_with_txs(my_block_number).await.unwrap().unwrap();
+		    graph.update_pool_data(b, Arc::clone(&query)).await;
+		} else {
+		    graph.save_pools(my_block_number).await?;
+		    break;
+		}
+	    }
+	    
+	}
+	
+    }
+    
+    tokio::spawn(async move {
+	let mut stream = c1.watch_blocks().await.unwrap();
+	while let Some(b) = stream.next().await {
+	    let block = c1.get_block_with_txs(b).await.unwrap().unwrap();
+	    tx.send(block).unwrap();
+	    
+	}
+    });
+    let graph = graph;
+    let mut graph = Arc::new(graph);
+    let paths = find_path(Arc::clone(&graph),&weth, &weth).await.unwrap();
+    
+    loop {    
+	println!("awaiting new block");
+	let new_block = rx.recv().unwrap();
+	let now = Instant::now();
+	match Arc::get_mut(&mut graph) {
+	    Some(g) => {g.update_pool_data(new_block, Arc::clone(&query)).await;}
+	    None => {}
+	}    
+	let took = now.elapsed();
+	println!("info updated took {}ms", took.as_millis());
+	let swap_paths = graph.path_from_indices(&paths);
+	for path in swap_paths.iter() {
+	    let (ai, ao) = path.maximize_profit().await;
+	    if ao > ai {
+		println!("{:#?}", path);
+		println!("{}", ai);
+		println!("{}", ao);
+	    }
+	}
+	let took = now.elapsed();
+	println!("took {}ms to find best", took.as_millis());
+    }
+
+
+    // let provider = Provider::<Http>::try_from("https://mainnet.infura.io/v3/cb7a603124c4411ba12877599e494814")?;
+    // let client = Arc::new(provider);
+
+    // let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
+    // let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
+
+
+    // let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
+    // let target = "0xc40d16476380e4037e6b1a2594caf6a6cc8da967".parse::<Address>().unwrap();
+
+    // let target_eth = U256::from_dec_str("857438959604129380483")?;
+
+    // let pool_save = PoolSave::load().unwrap();
+    // let pools = pool_save.pools;
+    // let graph = Graph::new(pools);
+    
+    // // let mut  graph = Graph::new(pools);
+    // // graph.full_update(query).await;
+    // // let pools = graph.pools.clone();
+    // // PoolSave::save(pools, client.get_block_number().await.unwrap()).await.unwrap();
+
+    // let now = Instant::now();
+    // let graph = Arc::new(graph);
+    // let paths = find_path(Arc::clone(&graph), &weth, &weth).await.unwrap();
+    // let swap_path = graph.path_from_indices(&paths);
+    // println!("{}", swap_path.len());
+    // let took = now.elapsed();
+    // println!("took {}ms", took.as_millis());
+
+    // let amount_in = U256::from_dec_str("1000000000000000").unwrap();
+
+    // //let mut most = ZERO;
+    // //let mut best: &SwapPath = &swap_path[0]; 
+    // let now = Instant::now();
+    // for path in swap_path.iter() {
+    // 	let (ai, ao) = path.maximize_profit().await;
+    // 	if ao > ai {
+    // 	    println!("{:#?}", path);
+    // 	    println!("{}", ai);
+    // 	    println!("{}", ao);
     // 	}
     // }
     
-    // let mut  graph = Graph::new(pools);
-    // graph.full_update(query).await;
-    // let pools = graph.pools.clone();
-    // PoolSave::save(pools, client.get_block_number().await.unwrap()).await.unwrap();
-
-    let now = Instant::now();
-    let graph = Arc::new(graph);
-    let paths = find_path(Arc::clone(&graph), &weth, &weth).await.unwrap();
-    let swap_path = graph.path_from_indices(paths);
-    println!("{}", swap_path.len());
-    let took = now.elapsed();
-    println!("took {}ms", took.as_millis());
-
-    let amount_in = U256::from_dec_str("1000000000000000").unwrap();
-
-    let mut most = ZERO;
-    let mut best: &SwapPath = &swap_path[0]; 
-    let now = Instant::now();
-    for path in swap_path.iter() {
-	let amount_out = path.swap_along_path(amount_in).await;
-	if amount_out > most {
-	    most = amount_out;
-	    best = path;
-	}   
-    }
-    let took = now.elapsed();
-    println!("{}", amount_in);
-    println!("{}", most);
-    println!("{:#?}", best);
-    println!("took {}ms to find best", took.as_millis());
+    // // for path in swap_path.iter() {
+    // // 	let amount_out = path.swap_along_path(amount_in).await;
+    // // 	if amount_out > most {
+    // // 	    most = amount_out;
+    // // 	    best = path;
+    // // 	}   
+    // // }
+    // let took = now.elapsed();
+    // // println!("{}", amount_in);
+    // // println!("{}", most);
+    // // println!("{:#?}", best);
+    // println!("took {}ms to find best", took.as_millis());
     Ok(())
 }
