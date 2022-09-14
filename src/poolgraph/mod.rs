@@ -99,7 +99,7 @@ impl Graph<Pool, Address, usize> {
     pub fn path_from_indices(&self, paths: Vec<Path>) -> Vec<SwapPath> {
 	let mut swap_paths: Vec<SwapPath> = Vec::with_capacity(paths.capacity());
 	for path in paths {
-	    let mut swap_path = SwapPath{steps: Vec::with_capacity(path.steps.capacity())};
+	    let mut swap_path = SwapPath{steps: Vec::with_capacity(path.steps.capacity()), good: true};
 	    
 	    for step in path.steps {
 		let pool = self.pools.get(step.pool).unwrap();
@@ -112,6 +112,7 @@ impl Graph<Pool, Address, usize> {
 	return swap_paths;
 
     }
+    
     pub async fn full_update(&mut self, query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) {
 	let mut pools_to_update: Vec<Address> = Vec::with_capacity(self.pools.len());
 	let mut indices: Vec<usize> = Vec::with_capacity(self.pools.len());
@@ -173,7 +174,9 @@ pub struct SwapStep<'a> {
 }
 #[derive(Debug)]
 pub struct SwapPath <'a> {
-    pub steps: Vec<SwapStep<'a>>
+    pub steps: Vec<SwapStep<'a>>,
+    pub good: bool
+
 }
 
 impl<'a> SwapPath <'a> {
