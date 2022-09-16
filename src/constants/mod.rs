@@ -1,4 +1,5 @@
 use ethers::types::{U256, H160};
+use hex_literal::hex;
 
 pub const MAX_SQRT_PRICE: U256 = U256{0:[
     6743328256752651557,
@@ -18,71 +19,6 @@ pub const ZERO: U256 = U256{0:[0,0,0,0]};
 
 pub const MAXLEN: usize = 3;
 
-pub const SUSHI_FAC: H160 = H160 {0: [
-192,
-174,
-228,
-120,
-227,
-101,
-142,
-38,
-16,
-197,
-247,
-164,
-162,
-225,
-119,
-124,
-233,
-228,
-242,
-172,
-]};
-
-pub const SHIBA_FAC: H160 = H160 {0: [
-    17,
-    89,
-    52,
-    19,
-    25,
-    22,
-    200,
-    178,
-    119,
-    221,
-    1,
-    14,
-    224,
-    45,
-    227,
-    99,
-    192,
-    157,
-    3,
-    124,
-]};
-
-pub const UNIV2_FAC: H160 = H160 {0: [
-    92,
-    105,
-    190,
-    231,
-    1,
-    239,
-    129,
-    74,
-    43,
-    106,
-    62,
-    221,
-    75,
-    22,
-    82,
-    203,
-    156,
-    197,
-    170,
-    111,
-]};
+pub const UNIV2_FAC: H160 = H160(hex!("5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f"));
+pub const SUSHI_FAC: H160 = H160(hex!("c0aee478e3658e2610c5f7a4a2e1777ce9e4f2ac"));
+pub const SHIBA_FAC: H160 = H160(hex!("115934131916c8b277dd010ee02de363c09d037c"));

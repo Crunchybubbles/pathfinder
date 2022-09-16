@@ -9,14 +9,16 @@ use pathfinder::{
 };
 use std::{sync::Arc, time::Instant};
 use ethers::{
-    types::{Address, U256, U64,Transaction, Block},
-    providers::{Provider, Http, Middleware, StreamExt},
+    prelude::*,
+    types::{Address, H160, U256, U64,Transaction, Block, Bytes},
+    providers::{Provider, Http, Middleware, StreamExt, call_raw::RawCall},
+    contract::ContractFactory,
 };
 
 use tokio::time::{sleep, Duration};
-
+use hex_literal::hex;
 use crossbeam::channel::unbounded;
-
+use rayon::prelude::*;
 
 
 #[tokio::main]
@@ -24,6 +26,7 @@ async fn main() -> eyre::Result<()> {
     let provider = Provider::<Http>::try_from("https://mainnet.infura.io/v3/cb7a603124c4411ba12877599e494814")?;
     let client = Arc::new(provider);
 
+    
     let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
     let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
     
@@ -31,7 +34,9 @@ async fn main() -> eyre::Result<()> {
     let c1 = Arc::clone(&client);
 //    let tx1 = tx.clone();
 
-    let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
+    let weth: H160 = H160(hex!("C02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"));
+    let yfi: H160 = H160(hex!("0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e"));
+    let wbtc: H160 = H160(hex!("2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"));
 
     // println!("loading pools!");
     // let block_num = client.get_block_number().await?;
@@ -85,8 +90,11 @@ async fn main() -> eyre::Result<()> {
     });
     let graph = graph;
     let mut graph = Arc::new(graph);
-    let paths = find_path(Arc::clone(&graph),&weth, &weth).await.unwrap();
     
+    let wethweth = find_path(Arc::clone(&graph),&weth, &weth).await.unwrap();
+    let wbtcwbtc = find_path(Arc::clone(&graph),&wbtc, &wbtc).await.unwrap();
+    let yfiyfi = find_path(Arc::clone(&graph), &yfi, &yfi).await.unwrap();
+    let allpaths = vec![wethweth,wbtcwbtc,yfiyfi];
     loop {    
 	println!("awaiting new block");
 	let new_block = rx.recv().unwrap();
@@ -97,74 +105,83 @@ async fn main() -> eyre::Result<()> {
 	}    
 	let took = now.elapsed();
 	println!("info updated took {}ms", took.as_millis());
-	let swap_paths = graph.path_from_indices(&paths);
-	for path in swap_paths.iter() {
-	    let (ai, ao) = path.maximize_profit().await;
-	    if ao > ai {
-		println!("{:#?}", path);
-		println!("{}", ai);
-		println!("{}", ao);
+	for paths in allpaths.iter() {
+	    let now = Instant::now();
+	    let swap_paths = graph.path_from_indices(&paths);	
+	    let took = now.elapsed();
+	    println!("path from indices took {}ms", took.as_millis());
+	
+	    let now = Instant::now();
+	    for path in swap_paths.iter() {
+
+		let (ai, ao) = path.maximize_profit().await;
+		if ao > ai {
+		    println!("{:#?}", path);
+		    println!("{}", ai);
+		    println!("{}", ao);
+		}
 	    }
 	}
+	 
 	let took = now.elapsed();
 	println!("took {}ms to find best", took.as_millis());
     }
 
 
-    // let provider = Provider::<Http>::try_from("https://mainnet.infura.io/v3/cb7a603124c4411ba12877599e494814")?;
-    // let client = Arc::new(provider);
+//     let provider = Provider::<Http>::try_from("https://mainnet.infura.io/v3/cb7a603124c4411ba12877599e494814")?;
+//     let client = Arc::new(provider);
 
-    // let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
-    // let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
+//     let query_addr = "0x5EF1009b9FCD4fec3094a5564047e190D72Bd511".parse::<Address>().unwrap();
+//     let query = Arc::new(FlashBotsUniV2Query::new(query_addr, Arc::clone(&client)));
 
 
-    // let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
-    // let target = "0xc40d16476380e4037e6b1a2594caf6a6cc8da967".parse::<Address>().unwrap();
+//     let weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".parse::<Address>().unwrap();
+// //    let target = "0xc40d16476380e4037e6b1a2594caf6a6cc8da967".parse::<Address>().unwrap();
 
-    // let target_eth = U256::from_dec_str("857438959604129380483")?;
+//   //  let target_eth = U256::from_dec_str("857438959604129380483")?;
 
-    // let pool_save = PoolSave::load().unwrap();
-    // let pools = pool_save.pools;
-    // let graph = Graph::new(pools);
+//     let pool_save = PoolSave::load().unwrap();
+//     let pools = pool_save.pools;
+//     let graph = Graph::new(pools);
     
-    // // let mut  graph = Graph::new(pools);
-    // // graph.full_update(query).await;
-    // // let pools = graph.pools.clone();
-    // // PoolSave::save(pools, client.get_block_number().await.unwrap()).await.unwrap();
+//     // let mut  graph = Graph::new(pools);
+//     // graph.full_update(query).await;
+//     // let pools = graph.pools.clone();
+//     // PoolSave::save(pools, client.get_block_number().await.unwrap()).await.unwrap();
 
-    // let now = Instant::now();
-    // let graph = Arc::new(graph);
-    // let paths = find_path(Arc::clone(&graph), &weth, &weth).await.unwrap();
-    // let swap_path = graph.path_from_indices(&paths);
-    // println!("{}", swap_path.len());
-    // let took = now.elapsed();
-    // println!("took {}ms", took.as_millis());
+//     let now = Instant::now();
+//     let graph = Arc::new(graph);
+//     let paths = find_path(Arc::clone(&graph), &weth, &weth).await.unwrap();
+//     let swap_path = graph.path_from_indices(&paths);
+//     println!("{}", swap_path.len());
+//     let took = now.elapsed();
+//     println!("took {}ms", took.as_millis());
 
-    // let amount_in = U256::from_dec_str("1000000000000000").unwrap();
+//     let amount_in = U256::from_dec_str("1000000000000000").unwrap();
 
-    // //let mut most = ZERO;
-    // //let mut best: &SwapPath = &swap_path[0]; 
-    // let now = Instant::now();
-    // for path in swap_path.iter() {
-    // 	let (ai, ao) = path.maximize_profit().await;
-    // 	if ao > ai {
-    // 	    println!("{:#?}", path);
-    // 	    println!("{}", ai);
-    // 	    println!("{}", ao);
-    // 	}
-    // }
+//     //let mut most = ZERO;
+//     //let mut best: &SwapPath = &swap_path[0]; 
+//     let now = Instant::now();
+//     for path in swap_path.iter() {
+// 	let (ai, ao) = path.maximize_profit().await;
+// 	if ao > ai {
+// 	    println!("{:#?}", path);
+// 	    println!("{}", ai);
+// 	    println!("{}", ao);
+// 	}
+//     }
     
-    // // for path in swap_path.iter() {
-    // // 	let amount_out = path.swap_along_path(amount_in).await;
-    // // 	if amount_out > most {
-    // // 	    most = amount_out;
-    // // 	    best = path;
-    // // 	}   
-    // // }
-    // let took = now.elapsed();
-    // // println!("{}", amount_in);
-    // // println!("{}", most);
-    // // println!("{:#?}", best);
-    // println!("took {}ms to find best", took.as_millis());
+//     // for path in swap_path.iter() {
+//     // 	let amount_out = path.swap_along_path(amount_in).await;
+//     // 	if amount_out > most {
+//     // 	    most = amount_out;
+//     // 	    best = path;
+//     // 	}   
+//     // }
+//     let took = now.elapsed();
+//     // println!("{}", amount_in);
+//     // println!("{}", most);
+//     // println!("{:#?}", best);
+//     println!("took {}ms to find best", took.as_millis());
     Ok(())
 }

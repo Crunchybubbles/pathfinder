@@ -4,7 +4,7 @@ use crate::{pool::Pool, constants::{MAXLEN, ZERO}, univ2pool::FlashBotsUniV2Quer
 use ethers::{providers::{Provider, Http}, types::{Address, Transaction, Block, U64, U256}};
 use std::sync::Arc;
 use crossbeam::channel::{unbounded, Receiver, Sender};
-
+use rayon::prelude::*;
 
 #[derive(Clone)]
 pub struct Graph<P, A, I> {
@@ -249,19 +249,20 @@ impl<'a> SwapPath <'a>{
 	let ten_19 = U256::from_dec_str("10000000000000000000").unwrap();
 	let ten_20 = U256::from_dec_str("100000000000000000000").unwrap();
 	let mut most = ZERO;
+	let mut amount_in = ZERO;
 	let initial_amounts = [ten_15, ten_16, ten_17, ten_18, ten_19, ten_20];
-	for (i, amount) in initial_amounts.iter().enumerate() {
+	for amount in initial_amounts.iter() {
 	    let amount_out = self.swap_along_path(*amount).await;
-
 	    if amount_out == ZERO {
-		return (ZERO, ZERO);
+		break;
 	    } else if &amount_out > &most {
 		most = amount_out;
+		amount_in = *amount;
 	    } else if &amount_out < &most {
-		return (initial_amounts[i - 1], most);
+		break;
 	    }
 	}
-	return (initial_amounts[5], most);
+	return (amount_in, most);
     }	
 	// let mut amount_out_last: U256 = ZERO;
 	// let mut amount_in_last: U256 = ZERO;

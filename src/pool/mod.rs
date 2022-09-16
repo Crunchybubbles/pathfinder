@@ -96,8 +96,9 @@ impl Pool {
 			    Pool::V2(p) => {
 				pools_to_update.push(p.id);
 				pool_indices.push(*index);
+				println!("v2");
 			    }
-			    Pool::V3(_) => {}
+			    Pool::V3(_) => {println!("v3")}
 			}
 
 		    } 
@@ -107,6 +108,7 @@ impl Pool {
 	
 	println!("updating {} pools", pools_to_update.len());
 	println!("{:#?}", pools_to_update);
+
 	let r = match query_contract.get_reserves_by_pairs(pools_to_update).call().await {
 	    Ok(t) => {t},
 	    Err(e) => {eprint!("{}", e); return pools}
