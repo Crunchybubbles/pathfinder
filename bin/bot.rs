@@ -3,7 +3,7 @@ use pathfinder::{
     pool::{Pool, load_pools, save_pools, load_pools_from_save, PoolSave},
     univ3pool::UniV3Calc,
     univ2pool::{UniV2Pool, UniV2Calc, FlashBotsUniV2Query},
-    poolgraph::{Graph, SwapPath, find_path},
+    poolgraph::{Graph, SwapPath, find_path, decode_and_test_path},
     calculator::Calculator,
     constants::ZERO,
 };
@@ -83,7 +83,8 @@ async fn main() -> eyre::Result<()> {
     tokio::spawn(async move {
 	let mut stream = c1.watch_blocks().await.unwrap();
 	while let Some(b) = stream.next().await {
-	    let block = c1.get_block_with_txs(b).await.unwrap().unwrap();
+	   
+	    let block = c1.get_block_with_txs(b).await.unwrap().unwrap(); // one of these unwraps panic
 	    tx.send(block).unwrap();
 	    
 	}
@@ -94,6 +95,7 @@ async fn main() -> eyre::Result<()> {
     let wethweth = find_path(Arc::clone(&graph),&weth, &weth).await.unwrap();
     let wbtcwbtc = find_path(Arc::clone(&graph),&wbtc, &wbtc).await.unwrap();
     let yfiyfi = find_path(Arc::clone(&graph), &yfi, &yfi).await.unwrap();
+    let count = wethweth.len() + wbtcwbtc.len() + yfiyfi.len();
     let allpaths = vec![wethweth,wbtcwbtc,yfiyfi];
     loop {    
 	println!("awaiting new block");
@@ -105,26 +107,29 @@ async fn main() -> eyre::Result<()> {
 	}    
 	let took = now.elapsed();
 	println!("info updated took {}ms", took.as_millis());
+	let now_all_paths = Instant::now();
 	for paths in allpaths.iter() {
 	    let now = Instant::now();
-	    let swap_paths = graph.path_from_indices(&paths);	
+	    let swap_paths = decode_and_test_path(Arc::clone(&graph), paths).await;	
 	    let took = now.elapsed();
 	    println!("path from indices took {}ms", took.as_millis());
 	
-	    let now = Instant::now();
-	    for path in swap_paths.iter() {
+	//     let now = Instant::now();
+	//     for path in swap_paths.iter() {
 
-		let (ai, ao) = path.maximize_profit().await;
-		if ao > ai {
-		    println!("{:#?}", path);
-		    println!("{}", ai);
-		    println!("{}", ao);
-		}
-	    }
+	// 	let (ai, ao) = path.maximize_profit().await;
+	// 	if ao > ai {
+	// 	    println!("{:#?}", path);
+	// 	    println!("{}", ai);
+	// 	    println!("{}", ao);
+	// 	}
+	//     }
 	}
-	 
-	let took = now.elapsed();
-	println!("took {}ms to find best", took.as_millis());
+	let took_all_paths = now_all_paths.elapsed();
+	println!("all paths took {}ms ", took_all_paths.as_millis());
+	println!("{}", count);
+	// let took = now.elapsed();
+	// println!("took {}ms to find best", took.as_millis());
     }
 
 

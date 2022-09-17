@@ -176,7 +176,10 @@ impl UniV2Pool {
 	    }
 	    
 	    if amount_out > reserve_in {
-		return reserve_in;
+		match reserve_in.checked_sub(U256::one()) {
+		    Some(r) => {return r}
+		    None => {return ZERO}
+		}
 	    }
 	    
 	    let kpre: U256;

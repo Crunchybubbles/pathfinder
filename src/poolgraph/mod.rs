@@ -112,6 +112,8 @@ impl Graph<Pool, Address, usize> {
 	return swap_paths;
 
     }
+
+    
     
     pub async fn full_update(&mut self, query_contract: Arc<FlashBotsUniV2Query<Provider<Http>>>) {
 	let mut pools_to_update: Vec<Address> = Vec::with_capacity(self.pools.len());
@@ -212,6 +214,50 @@ pub struct SwapPath <'a> {
     pub good: bool
 
 }
+
+pub async fn decode_and_test_path(graph: Arc<Graph<Pool, Address, usize>>, paths: &Vec<Path>) {
+
+    for path in paths {
+	let mut swap_path = SwapPath{steps: Vec::with_capacity(path.steps.capacity()), good: true};
+	
+	for step in path.steps.iter() {
+	    let pool = graph.pools.get(step.pool).unwrap();
+	    let token_in = graph.itt.get(&step.token_in).unwrap();
+	    let token_out = graph.itt.get(&step.token_out).unwrap();
+	    swap_path.steps.push(SwapStep{pool, token_in, token_out});
+	}
+	let (ai, ao) = swap_path.maximize_profit().await;
+	if ao > ai {
+	    println!("-------------------------------------");
+	    swap_path.steps.iter().for_each(|step| {
+		println!("......................................");
+		println!("address {:x}", step.pool.addr());
+		match step.pool {
+		    Pool::V2(pool) => {
+			println!("token 0 {:x}", pool.token0.id);
+			println!("reserv0 {}", pool.token0.reserves);
+			println!("token 1 {:x}", pool.token1.id);
+			println!("reserv1 {}", pool.token1.reserves);
+		    }
+		    Pool::V3(_) => {}
+		}
+		println!("tokenIn {:x}", step.token_in);
+		println!("tokeOut {:x}", step.token_out);
+		println!("......................................");
+	    });
+	    println!("amountI {}", ai);
+	    println!("amountO {}", ao);
+	    println!("-------------------------------------");
+	    println!("");
+
+	}
+	
+    }
+
+    
+}
+    
+
 
 
 
